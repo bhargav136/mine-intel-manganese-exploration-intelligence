@@ -368,9 +368,9 @@ export const SatelliteMapViewer: React.FC<SatelliteMapViewerProps> = ({ selected
       {/* Scientific Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { Icon: Leaf, color: "text-emerald-400", title: "NDVI Vegetation Stress", desc: "High heavy-metal soil concentrations (Mn/Fe) stunt surface vegetation, producing distinct chlorosis anomalies (NDVI < 0.25) directly above shallow subsurface ore lenses." },
-          { Icon: Flame, color: "text-amber-400", title: "Thermal Inertia (LST)", desc: "Manganese oxides (braunite/pyrolusite) possess higher thermal diffusivity than surrounding mica-schists, remaining cooler at solar noon and retaining heat longer at dusk." },
-          { Icon: Compass, color: "text-sky-400", title: "Sentinel-1 InSAR Stability", desc: "Synthetic Aperture Radar interferometry tracks millimeter-scale pit highwall and overburden dump deformation, preventing slope failures before heavy haulage operations." },
+          { Icon: Leaf, color: "text-emerald-400", title: "NDVI Vegetation Stress", desc: "Unhealthy-looking plants on satellite images can be a key clue that manganese ore lies buried underground." },
+          { Icon: Flame, color: "text-amber-400", title: "Thermal Inertia (LST)", desc: "Manganese-rich ground heats up and cools down differently than normal rock, and satellites can detect this unique temperature pattern." },
+          { Icon: Compass, color: "text-sky-400", title: "Sentinel-1 InSAR Stability", desc: "Satellites detect tiny millimeter ground movements to warn teams about unstable mine slopes before accidents happen." },
         ].map(({ Icon, color, title, desc }) => (
           <div key={title} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
             <div className={`flex items-center space-x-2 ${color} font-bold text-xs mb-1`}>
