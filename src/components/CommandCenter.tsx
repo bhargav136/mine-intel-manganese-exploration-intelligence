@@ -12,6 +12,7 @@ import {
   CloudRain,
   ArrowRight,
   ShieldAlert,
+  Satellite,
 } from 'lucide-react';
 import { InteractiveMap } from './InteractiveMap';
 import { LeafletReserveMap } from './LeafletReserveMap';
