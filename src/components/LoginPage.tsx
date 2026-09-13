@@ -20,15 +20,17 @@ interface LoginPageProps {
   isOpen?: boolean;
   onClose?: () => void;
   isFullPage?: boolean;
+  initialTab?: 'signin' | 'signup';
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
   isOpen = true,
   onClose,
   isFullPage = false,
+  initialTab = 'signin',
 }) => {
   const { user, login, register, switchUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>(initialTab);
   const [email, setEmail] = useState('dr.sharma@moil.in');
   const [password, setPassword] = useState('password123');
   const [name, setName] = useState('');
