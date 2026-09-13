@@ -15,7 +15,7 @@ import {
   Satellite,
 } from 'lucide-react';
 import { InteractiveMap } from './InteractiveMap';
-import { SatelliteMapViewer } from './SatelliteMapViewer';
+import { LeafletReserveMap } from './LeafletReserveMap';
 import { TopPriorityTargets } from './TopPriorityTargets';
 import { TargetDetailModal } from './TargetDetailModal';
 import {
@@ -312,7 +312,9 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
       {/* Main Map View based on MapEngine selection */}
       {mapEngine === 'leaflet' ? (
         <div className="space-y-4">
-          <SatelliteMapViewer
+          <LeafletReserveMap
+            selectedTarget={selectedTarget}
+            onSelectTarget={handleSelectTarget}
             selectedRegion={selectedRegion}
           />
 

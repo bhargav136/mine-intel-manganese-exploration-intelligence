@@ -14,6 +14,10 @@ import {
   Database,
   Activity,
   AlertTriangle,
+  Leaf,
+  Flame,
+  Droplet,
+  Compass,
 } from 'lucide-react';
 import { ExplorationTarget } from '../types';
 import { TOP_PRIORITY_TARGETS, MOIL_MINE_SITES } from '../data/mockData';
@@ -338,6 +342,9 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
   const currentSector = SECTOR_CONFIGS[sectorKey];
 
   const [activeBasemap, setActiveBasemap] = useState<'satellite' | 'streets' | 'topo'>('satellite');
+  const [activeSpectralLayer, setActiveSpectralLayer] = useState<'rgb' | 'ndvi' | 'lst' | 'moisture' | 'swir' | 'insar'>('rgb');
+  const [spectralOpacity, setSpectralOpacity] = useState<number>(0.75);
+  const spectralLayerRef = useRef<L.LayerGroup | null>(null);
   const [showHeatmapZones, setShowHeatmapZones] = useState(true);
   const [showBoreholes, setShowBoreholes] = useState(true);
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget | null>(
@@ -400,9 +407,11 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
 
     const layerGroup = L.layerGroup().addTo(map);
     const zonesGroup = L.layerGroup().addTo(map);
+    const spectralGroup = L.layerGroup().addTo(map);
 
     layerGroupRef.current = layerGroup;
     zonesLayerRef.current = zonesGroup;
+    spectralLayerRef.current = spectralGroup;
     mapInstanceRef.current = map;
 
     // Force map to recalculate its container size after React renders
@@ -442,6 +451,100 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
     if (activeBasemap === 'streets') baseLayers.streets.addTo(map);
     if (activeBasemap === 'topo') baseLayers.topo.addTo(map);
   }, [activeBasemap]);
+
+  // Draw Multi-Spectral Earth Observation Overlays
+  useEffect(() => {
+    const spectralGroup = spectralLayerRef.current;
+    if (!spectralGroup) return;
+    spectralGroup.clearLayers();
+
+    const [cLat, cLng] = currentSector.center;
+
+    if (activeSpectralLayer === 'ndvi') {
+      const ndviZones = [
+        { lat: cLat + 0.008, lng: cLng + 0.012, radius: 2400, val: 0.19, text: 'High Mn Outcrop Chlorosis (NDVI: 0.19)' },
+        { lat: cLat - 0.009, lng: cLng - 0.015, radius: 2800, val: 0.24, text: 'Gondite Horizon Stress (NDVI: 0.24)' },
+        { lat: cLat + 0.015, lng: cLng - 0.010, radius: 2000, val: 0.58, text: 'Healthy Dense Forest Canopy (NDVI: 0.58)' },
+      ];
+      ndviZones.forEach((z) => {
+        const color = z.val < 0.3 ? '#ef4444' : z.val < 0.45 ? '#eab308' : '#22c55e';
+        L.circle([z.lat, z.lng], {
+          radius: z.radius,
+          color,
+          fillColor: color,
+          fillOpacity: spectralOpacity * 0.55,
+          weight: 1.5,
+        })
+          .bindTooltip(`<b>${z.text}</b><br/>Sentinel-2 Multispectral`, { permanent: false })
+          .addTo(spectralGroup);
+      });
+    } else if (activeSpectralLayer === 'lst') {
+      const lstZones = [
+        { lat: cLat + 0.006, lng: cLng + 0.005, radius: 2600, temp: '36.8°C', note: 'Exposed Ore Body Thermal Signature' },
+        { lat: cLat - 0.011, lng: cLng + 0.014, radius: 2200, temp: '32.1°C', note: 'Moist Overburden Regolith' },
+      ];
+      lstZones.forEach((z) => {
+        L.circle([z.lat, z.lng], {
+          radius: z.radius,
+          color: '#f97316',
+          fillColor: '#f97316',
+          fillOpacity: spectralOpacity * 0.55,
+          weight: 1.5,
+        })
+          .bindTooltip(`<b>LST: ${z.temp}</b><br/>${z.note}<br/>Landsat-9 TIRS Band 10`, { permanent: false })
+          .addTo(spectralGroup);
+      });
+    } else if (activeSpectralLayer === 'moisture') {
+      const moistZones = [
+        { lat: cLat - 0.007, lng: cLng - 0.005, radius: 2500, level: '91% (Waterlogged Sump)', color: '#06b6d4' },
+        { lat: cLat + 0.012, lng: cLng - 0.018, radius: 2100, level: '58% (Moderate Infiltration)', color: '#3b82f6' },
+      ];
+      moistZones.forEach((z) => {
+        L.circle([z.lat, z.lng], {
+          radius: z.radius,
+          color: z.color,
+          fillColor: z.color,
+          fillOpacity: spectralOpacity * 0.55,
+          weight: 1.5,
+        })
+          .bindTooltip(`<b>Soil Moisture: ${z.level}</b><br/>SMAP & Sentinel-1 SAR`, { permanent: false })
+          .addTo(spectralGroup);
+      });
+    } else if (activeSpectralLayer === 'swir') {
+      const swirZones = [
+        { lat: cLat + 0.009, lng: cLng - 0.008, radius: 2900, ratio: '2.84 (High Braunite/Pyrolusite Index)' },
+        { lat: cLat - 0.014, lng: cLng + 0.011, radius: 2400, ratio: '2.41 (Psilomelane Lens)' },
+      ];
+      swirZones.forEach((z) => {
+        L.circle([z.lat, z.lng], {
+          radius: z.radius,
+          color: '#a855f7',
+          fillColor: '#a855f7',
+          fillOpacity: spectralOpacity * 0.55,
+          weight: 1.5,
+        })
+          .bindTooltip(`<b>SWIR Ratio: ${z.ratio}</b><br/>ASTER Band 4 / Band 7`, { permanent: false })
+          .addTo(spectralGroup);
+      });
+    } else if (activeSpectralLayer === 'insar') {
+      const insarPoints = [
+        { lat: cLat + 0.011, lng: cLng + 0.008, disp: '-1.8 mm/yr', status: 'STABLE HIGHWALL' },
+        { lat: cLat - 0.008, lng: cLng + 0.012, disp: '-4.2 mm/yr', status: 'MINOR SETTLEMENT BENCH 3' },
+        { lat: cLat - 0.014, lng: cLng - 0.011, disp: '+0.4 mm/yr', status: 'STABLE DUMP FOOT' },
+      ];
+      insarPoints.forEach((p) => {
+        L.circleMarker([p.lat, p.lng], {
+          radius: 8,
+          color: '#38bdf8',
+          fillColor: '#0284c7',
+          fillOpacity: 0.9,
+          weight: 2,
+        })
+          .bindTooltip(`<b>InSAR Ground Motion:</b><br/>Rate: <b>${p.disp}</b><br/>${p.status}`, { permanent: false })
+          .addTo(spectralGroup);
+      });
+    }
+  }, [activeSpectralLayer, spectralOpacity, sectorKey]);
 
   // Update Markers & Zones per Selected Sector
   useEffect(() => {
@@ -686,6 +789,116 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
         {/* Leaflet Map Canvas */}
         <div className="flex-1 h-full min-h-[420px] relative z-10">
           <div ref={mapContainerRef} className="w-full h-full" style={{ minHeight: '420px' }} />
+
+          {/* Floating Multi-Spectral Layer Selector (matches user screenshot) */}
+          <div className="absolute top-3 left-14 z-[1000] bg-slate-900/90 backdrop-blur-md border border-slate-700 rounded-xl p-3 shadow-xl max-w-xs space-y-2 text-white">
+            <div className="flex items-center justify-between text-xs font-bold text-white border-b border-slate-800 pb-1.5">
+              <span className="flex items-center space-x-1.5">
+                <Layers className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Multi-Spectral Layer</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">EO Sentinel/Landsat</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5 text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveSpectralLayer('rgb')}
+                className={`px-2 py-1.5 rounded-lg text-left transition flex items-center space-x-1.5 cursor-pointer ${
+                  activeSpectralLayer === 'rgb'
+                    ? 'bg-cyan-600 text-white font-bold'
+                    : 'bg-slate-950 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Satellite className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">True Color (RGB)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSpectralLayer('ndvi')}
+                className={`px-2 py-1.5 rounded-lg text-left transition flex items-center space-x-1.5 cursor-pointer ${
+                  activeSpectralLayer === 'ndvi'
+                    ? 'bg-emerald-600 text-white font-bold'
+                    : 'bg-slate-950 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Leaf className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span className="truncate">NDVI Chlorosis</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSpectralLayer('lst')}
+                className={`px-2 py-1.5 rounded-lg text-left transition flex items-center space-x-1.5 cursor-pointer ${
+                  activeSpectralLayer === 'lst'
+                    ? 'bg-amber-600 text-white font-bold'
+                    : 'bg-slate-950 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="truncate">Thermal LST</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSpectralLayer('moisture')}
+                className={`px-2 py-1.5 rounded-lg text-left transition flex items-center space-x-1.5 cursor-pointer ${
+                  activeSpectralLayer === 'moisture'
+                    ? 'bg-blue-600 text-white font-bold'
+                    : 'bg-slate-950 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Droplet className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span className="truncate">Soil Moisture</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSpectralLayer('swir')}
+                className={`px-2 py-1.5 rounded-lg text-left transition flex items-center space-x-1.5 cursor-pointer ${
+                  activeSpectralLayer === 'swir'
+                    ? 'bg-purple-600 text-white font-bold'
+                    : 'bg-slate-950 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                <span className="truncate">SWIR Mineral</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSpectralLayer('insar')}
+                className={`px-2 py-1.5 rounded-lg text-left transition flex items-center space-x-1.5 cursor-pointer ${
+                  activeSpectralLayer === 'insar'
+                    ? 'bg-sky-600 text-white font-bold'
+                    : 'bg-slate-950 text-slate-300 hover:bg-slate-800'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                <span className="truncate">InSAR Stability</span>
+              </button>
+            </div>
+
+            {/* Opacity Slider */}
+            {activeSpectralLayer !== 'rgb' && (
+              <div className="pt-2 border-t border-slate-800">
+                <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                  <span>Layer Opacity:</span>
+                  <span className="font-mono text-cyan-400 font-bold">{Math.round(spectralOpacity * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.2"
+                  max="1.0"
+                  step="0.05"
+                  value={spectralOpacity}
+                  onChange={(e) => setSpectralOpacity(Number(e.target.value))}
+                  className="w-full accent-cyan-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer"
+                />
+              </div>
+            )}
+          </div>
 
           {/* Floating Search & Filter Bar on Map */}
           <div className="absolute top-3 right-3 z-[1000] bg-white/95 backdrop-blur rounded-xl border border-slate-200 p-2 shadow-lg flex items-center gap-2 max-w-sm">
