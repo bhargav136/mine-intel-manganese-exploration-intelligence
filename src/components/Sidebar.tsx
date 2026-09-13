@@ -12,6 +12,7 @@ import {
   LogIn,
   User,
   ShieldCheck,
+  BookOpen,
 } from 'lucide-react';
 import { NavigationTab } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -47,6 +48,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     badge?: string;
     badgeColor?: string;
   }[] = [
+    {
+      id: 'project-overview',
+      label: 'Project Overview',
+      icon: <BookOpen className="w-4 h-4" />,
+      badge: 'Working Flow',
+      badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
+    },
     {
       id: 'command-center',
       label: 'Command Center',

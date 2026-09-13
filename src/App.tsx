@@ -26,11 +26,12 @@ import {
   CORRECTIVE_ACTIONS,
   BOREHOLE_ASSAYS,
 } from './data/mockData';
+import { ProjectOverviewView } from './components/ProjectOverviewView';
 import { NavigationTab, ExplorationTarget } from './types';
 
 function DashboardView() {
   const { user, isLoginModalOpen, openLoginModal, closeLoginModal } = useAuth();
-  const [activeTab, setActiveTab] = useState<NavigationTab>('command-center');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('project-overview');
   const [targets, setTargets] = useState<ExplorationTarget[]>(TOP_PRIORITY_TARGETS);
   const [verifiedCount, setVerifiedCount] = useState<number>(60);
   const [isAnalyzeModalOpen, setIsAnalyzeModalOpen] = useState(false);
@@ -131,6 +132,10 @@ function DashboardView() {
 
         {/* Scrollable View Content */}
         <main className="flex-1 overflow-y-auto">
+          {activeTab === 'project-overview' && (
+            <ProjectOverviewView onNavigateTab={setActiveTab} />
+          )}
+
           {activeTab === 'command-center' && (
             <CommandCenter
               targets={targets}

@@ -1,4 +1,5 @@
 export type NavigationTab =
+  | 'project-overview'
   | 'command-center'
   | 'analyze-area'
   | 'prospectivity-explorer'

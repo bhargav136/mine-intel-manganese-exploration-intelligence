@@ -132,7 +132,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       id="login-modal-overlay"
       className={
         isFullPage
-          ? "min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          ? "min-h-screen w-full bg-[#F8FAFC] flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
           : "fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
       }
       onClick={isFullPage ? undefined : onClose}
@@ -142,7 +142,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         onClick={(e) => e.stopPropagation()}
         className={
           isFullPage
-            ? "bg-white rounded-2xl max-w-4xl w-full border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto"
+            ? "bg-white rounded-2xl max-w-4xl w-full border border-slate-200 shadow-xl overflow-hidden flex flex-col md:flex-row my-auto"
             : "bg-white rounded-2xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
         }
       >
