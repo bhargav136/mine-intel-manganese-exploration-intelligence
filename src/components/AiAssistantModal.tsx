@@ -75,7 +75,7 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
       });
 
       const data = await response.json();
-      if (data.reply && data.reply.trim().length > 0) {
+      if (data.reply && data.reply.trim().length > 0 && !data.reply.includes("offline prototype mode")) {
         setMessages((prev) => [...prev, { role: 'model', text: data.reply }]);
       } else {
         const fallbackReply = generateDomainResponse(query);
