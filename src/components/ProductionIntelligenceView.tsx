@@ -94,7 +94,7 @@ export const ProductionIntelligenceView: React.FC<ProductionIntelligenceViewProp
                 Production Intelligence & SARIMA Shortfall Forecaster
               </h2>
               <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-red-100 text-red-800 border border-red-200">
-                SIH26009 Forecaster
+                AI SHORTFALL ENGINE
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -239,7 +239,7 @@ export const ProductionIntelligenceView: React.FC<ProductionIntelligenceViewProp
             <div className="flex items-center gap-2">
               <Sliders className="w-5 h-5 text-blue-400" />
               <h3 className="text-base font-bold text-white tracking-tight">
-                Live Constraint Relaxation Simulator (SIH26009 Core Hackathon Demo)
+                Live Constraint Relaxation Simulator (Operational Recovery Model)
               </h3>
             </div>
             <p className="text-xs text-slate-400 mt-1">

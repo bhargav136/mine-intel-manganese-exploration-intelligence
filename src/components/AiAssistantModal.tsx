@@ -82,8 +82,8 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({
         let contextualFallback = '';
         const q = query.toLowerCase();
 
-        if (q.includes('rainfall') || q.includes('ndvi') || q.includes('sih') || q.includes('spectral')) {
-          contextualFallback = `**SIH26009 Scientific Foundation**:
+        if (q.includes('rainfall') || q.includes('ndvi') || q.includes('spectral')) {
+          contextualFallback = `**GeoAI Scientific Foundation**:
 Surface rainfall, soil moisture, and NDVI alone **cannot** identify sub-surface manganese ore bodies. Claiming so is geologically indefensible.
 
 In **MINE-INTEL**, we solve this scientifically by integrating:
@@ -120,7 +120,7 @@ Our SARIMA time-series model decomposed the projected shortfall into 3 constrain
   };
 
   const samplePrompts = [
-    'SIH26009: Why spectral over raw rainfall/NDVI?',
+    'Why spectral SWIR over raw rainfall/NDVI?',
     'How is the 750 MT shortfall recovered?',
     'Explain T-003 borehole assay & grade',
     'What ASTER band ratios detect braunite?',

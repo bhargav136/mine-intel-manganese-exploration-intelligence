@@ -106,7 +106,7 @@ export const ProspectivityExplorerView: React.FC<ProspectivityExplorerViewProps>
       <div className="p-3.5 bg-indigo-50/70 border border-indigo-200/80 rounded-xl flex items-start gap-3 text-xs text-indigo-950">
         <Satellite className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
         <div className="leading-relaxed">
-          <strong>SIH26009 Spectral Geology Grounding:</strong> Sub-surface manganese deposits in the Sausar Belt cannot be found with raw rainfall or NDVI. Our model inverts <strong>ASTER SWIR Band Ratio 12/11 (2.20 µm pyrolusite absorption)</strong>, <strong>Sentinel-2 ferric index (B4/B2)</strong>, and <strong>GSI Mansar Formation gondite contacts</strong> to produce defensible prospectivity scores with 95% confidence intervals.
+          <strong>GeoAI Spectral Geology Grounding:</strong> Sub-surface manganese deposits in the Sausar Belt cannot be found with raw rainfall or NDVI. Our model inverts <strong>ASTER SWIR Band Ratio 12/11 (2.20 µm pyrolusite absorption)</strong>, <strong>Sentinel-2 ferric index (B4/B2)</strong>, and <strong>GSI Mansar Formation gondite contacts</strong> to produce defensible prospectivity scores with 95% confidence intervals.
         </div>
       </div>
 

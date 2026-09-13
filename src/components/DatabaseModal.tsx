@@ -205,13 +205,13 @@ export const DatabaseModal: React.FC<DatabaseModalProps> = ({ isOpen, onClose })
                 </div>
               </div>
 
-              {/* SIH26009 Scientific Credibility Notice */}
+              {/* GeoAI Scientific Credibility Notice */}
               <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/60">
                 <div className="flex items-start gap-2.5">
                   <Layers className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                   <div>
                     <h5 className="text-xs font-bold text-blue-900">
-                      SIH26009 Scientific Grounding
+                      GeoAI Scientific Grounding
                     </h5>
                     <p className="text-[11px] text-blue-800/90 mt-0.5 leading-relaxed">
                       All prospectivity scores in this database are constrained by ASTER SWIR band ratio 12/11 (pyrolusite/braunite), band 4/2 (ferric gossan), aeromagnetic Bouguer gravity lineaments, and Sausar belt geological contacts. Production shortfalls are dynamically modeled using SARIMA time-series and real-time equipment constraint attribution.

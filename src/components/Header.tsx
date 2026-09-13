@@ -81,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
             MINE-INTEL
           </h1>
           <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-slate-100 text-slate-700 tracking-wide border border-slate-200">
-            MOIL LIMITED · SIH26009
+            MOIL LIMITED · MINISTRY OF STEEL
           </span>
         </div>
         <p className="text-xs font-medium text-slate-500 mt-0.5">

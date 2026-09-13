@@ -54,7 +54,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
               Regional Overview: Prospectivity Map
             </h3>
             <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
-              SIH26009 SPACE AI
+              GEO-AI SPACE ENGINE
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">

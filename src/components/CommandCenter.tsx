@@ -14,6 +14,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { InteractiveMap } from './InteractiveMap';
+import { LeafletReserveMap } from './LeafletReserveMap';
 import { TopPriorityTargets } from './TopPriorityTargets';
 import { TargetDetailModal } from './TargetDetailModal';
 import {
@@ -45,6 +46,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
 }) => {
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [mapEngine, setMapEngine] = useState<'leaflet' | 'schematic'>('leaflet');
 
   const handleSelectCluster = (cluster: TargetCluster) => {
     if (cluster.primaryTargetId) {
@@ -272,31 +274,112 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         </div>
       </div>
 
-      {/* Main Grid matching screenshot layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-        {/* Left Map View (~68% on large screens) */}
-        <div className="lg:col-span-8 min-h-[520px]">
-          <InteractiveMap
-            clusters={clusters}
-            selectedTarget={selectedTarget}
-            onSelectCluster={handleSelectCluster}
-            onSelectTarget={handleSelectTarget}
-            onOpenFullExplorer={onOpenFullExplorer}
-            targets={targets}
-            onOpenApiKeyModal={onOpenApiKeyModal}
-          />
+      {/* Map Engine Switcher Bar */}
+      <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+        <div className="flex items-center gap-2">
+          <MapIcon className="w-4 h-4 text-blue-600" />
+          <span className="text-xs font-bold text-slate-800">Manganese Reserve GIS Visualizer:</span>
         </div>
-
-        {/* Right Top Priority Targets List (~32% on large screens) */}
-        <div className="lg:col-span-4 min-h-[520px]">
-          <TopPriorityTargets
-            targets={targets}
-            selectedTarget={selectedTarget}
-            onSelectTarget={handleSelectTarget}
-            onOpenTargetDetail={handleOpenTargetDetail}
-          />
+        <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <button
+            onClick={() => setMapEngine('leaflet')}
+            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+              mapEngine === 'leaflet'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Satellite className="w-3.5 h-3.5" />
+            <span>Big Leaflet GIS Satellite Map (Recommended)</span>
+          </button>
+          <button
+            onClick={() => setMapEngine('schematic')}
+            className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+              mapEngine === 'schematic'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>Regional Sector Schematic</span>
+          </button>
         </div>
       </div>
+
+      {/* Main Map View based on MapEngine selection */}
+      {mapEngine === 'leaflet' ? (
+        <div className="space-y-4">
+          <LeafletReserveMap
+            selectedTarget={selectedTarget}
+            onSelectTarget={handleSelectTarget}
+          />
+
+          {/* Bottom Table of Top Targets under Big Map */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-blue-600" />
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Top Priority Manganese Exploration Targets (100 Targets Evaluated)
+                </h4>
+              </div>
+              <button
+                onClick={onOpenFullExplorer}
+                className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+              >
+                Open Full Explorer &rarr;
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              {targets.slice(0, 4).map((target) => (
+                <div
+                  key={target.id}
+                  onClick={() => handleSelectTarget(target)}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer ${
+                    selectedTarget?.id === target.id
+                      ? 'border-blue-500 bg-blue-50/50 shadow-xs'
+                      : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-black text-slate-900">{target.id}</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                      {target.estimatedGradeMn}% Mn
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-700 font-semibold truncate">{target.locationName}</div>
+                  <div className="text-[10px] text-slate-500 mt-1 flex justify-between">
+                    <span>Reserve: {(target.estimatedReserveMT / 1000000).toFixed(1)} MT</span>
+                    <span>Depth: {target.depthMeters}m</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+          <div className="lg:col-span-8 min-h-[520px]">
+            <InteractiveMap
+              clusters={clusters}
+              selectedTarget={selectedTarget}
+              onSelectCluster={handleSelectCluster}
+              onSelectTarget={handleSelectTarget}
+              onOpenFullExplorer={onOpenFullExplorer}
+              targets={targets}
+              onOpenApiKeyModal={onOpenApiKeyModal}
+            />
+          </div>
+          <div className="lg:col-span-4 min-h-[520px]">
+            <TopPriorityTargets
+              targets={targets}
+              selectedTarget={selectedTarget}
+              onSelectTarget={handleSelectTarget}
+              onOpenTargetDetail={handleOpenTargetDetail}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Target Detail Modal */}
       {isModalOpen && selectedTarget && (

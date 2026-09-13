@@ -38,7 +38,7 @@ export const SihMethodologyModal: React.FC<SihMethodologyModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-white tracking-tight">
-                  SIH26009 Scientific Methodology & Architectural Disclosure
+                  Scientific Methodology & GeoAI Architectural Disclosure
                 </h3>
                 <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-amber-400/20 text-amber-300 border border-amber-400/40">
                   Domain Defense
@@ -63,11 +63,11 @@ export const SihMethodologyModal: React.FC<SihMethodologyModalProps> = ({
           <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200 space-y-2">
             <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
               <ShieldAlert className="w-4 h-4 text-amber-600" />
-              <span>The Geological Reality: Addressing the SIH26009 Problem Statement Flaw</span>
+              <span>The Geological Reality: Addressing Surface Remote Sensing Limitations</span>
             </div>
             <p className="text-amber-800">
-              The official hackathon problem statement requests using <em>rainfall, soil moisture, vegetation index (NDVI), and land temperature</em> to locate sub-surface manganese ore.
-              <strong> Any domain geologist or mining evaluator knows this is physically impossible:</strong> vegetation and surface temperature are indirect surficial artifacts that do not penetrate through 15–100m of overburden regolith. Claiming a direct machine learning prediction from these four inputs produces a scientifically indefensible model that would be dismantled immediately by domain judges.
+              Naïve approaches attempt to use <em>rainfall, soil moisture, vegetation index (NDVI), and land temperature</em> alone to locate sub-surface manganese ore.
+              <strong> Any domain geologist knows this is physically impossible:</strong> vegetation and surface temperature are indirect surficial artifacts that do not penetrate through 15–100m of overburden regolith. Claiming a direct prediction from these four inputs produces an indefensible model.
             </p>
           </div>
 
