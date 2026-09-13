@@ -17,6 +17,13 @@ export function isMongoConfigured(): boolean {
   return !!process.env.MONGODB_URI && process.env.MONGODB_URI.trim().length > 0;
 }
 
+export function setMongoUri(uri: string) {
+  process.env.MONGODB_URI = (uri || "").trim();
+  cachedClient = null;
+  cachedDb = null;
+  isSeeded = false;
+}
+
 export async function getMongoDb(): Promise<Db | null> {
   const uri = process.env.MONGODB_URI?.trim();
   if (!uri) {

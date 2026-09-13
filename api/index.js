@@ -157,6 +157,12 @@ var isSeeded = false;
 function isMongoConfigured() {
   return !!process.env.MONGODB_URI && process.env.MONGODB_URI.trim().length > 0;
 }
+function setMongoUri(uri) {
+  process.env.MONGODB_URI = (uri || "").trim();
+  cachedClient = null;
+  cachedDb = null;
+  isSeeded = false;
+}
 async function getMongoDb() {
   const uri = process.env.MONGODB_URI?.trim();
   if (!uri) {
@@ -634,8 +640,10 @@ app.post("/api/auth/register", async (req, res) => {
 app.get("/api/settings", async (req, res) => {
   try {
     const settings = await getSettingsAsync();
+    const mongoStatus = await getMongoStatus();
     res.json({
       mapSettings: settings.mapSettings,
+      mongoStatus,
       apiKeys: {
         geminiApiKeyMasked: settings.apiKeys.geminiApiKey ? `${settings.apiKeys.geminiApiKey.slice(0, 4)}...${settings.apiKeys.geminiApiKey.slice(-4)}` : "",
         hasGeminiApiKey: !!settings.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
@@ -650,7 +658,10 @@ app.get("/api/settings", async (req, res) => {
 });
 app.post("/api/settings", async (req, res) => {
   try {
-    const { mapSettings, apiKeys } = req.body;
+    const { mapSettings, apiKeys, mongodbUri } = req.body;
+    if (typeof mongodbUri === "string") {
+      setMongoUri(mongodbUri);
+    }
     const cleanApiKeys = {};
     if (apiKeys) {
       if (typeof apiKeys.geminiApiKey === "string") {
@@ -661,11 +672,13 @@ app.post("/api/settings", async (req, res) => {
       }
     }
     const updated = await updateSettingsAsync(mapSettings, cleanApiKeys);
-    await logActionAsync("System", "Settings Updated", `Updated map and API credentials.`);
+    await logActionAsync("System", "Settings Updated", `Updated map, database, and API credentials.`);
+    const mongoStatus = await getMongoStatus();
     res.json({
       success: true,
       message: "Settings successfully updated in MINE-INTEL database.",
       mapSettings: updated.mapSettings,
+      mongoStatus,
       hasGeminiApiKey: !!updated.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
       preferredModel: updated.apiKeys.preferredModel
     });

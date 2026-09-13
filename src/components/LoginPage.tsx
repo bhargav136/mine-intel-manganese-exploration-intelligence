@@ -38,6 +38,39 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [demoProfiles, setDemoProfiles] = useState<AuthUser[]>([]);
   const [dbStatus, setDbStatus] = useState<any>(null);
+  const [showMongoConfig, setShowMongoConfig] = useState(false);
+  const [mongoUriInput, setMongoUriInput] = useState('');
+  const [isSavingMongo, setIsSavingMongo] = useState(false);
+  const [mongoSuccessMsg, setMongoSuccessMsg] = useState<string | null>(null);
+
+  const handleSaveMongo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mongoUriInput.trim()) return;
+    setIsSavingMongo(true);
+    setMongoSuccessMsg(null);
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mongodbUri: mongoUriInput }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMongoSuccessMsg(
+          data.mongoStatus?.connected
+            ? `Connected to MongoDB Atlas (${data.mongoStatus.dbName})!`
+            : 'Saved MongoDB URI'
+        );
+        const statusRes = await fetch('/api/database/status');
+        const statusData = await statusRes.json();
+        setDbStatus(statusData);
+      }
+    } catch (err: any) {
+      setMongoSuccessMsg(err?.message || 'Error updating MongoDB URI');
+    } finally {
+      setIsSavingMongo(false);
+    }
+  };
 
   useEffect(() => {
     // Fetch registered users for 1-click login & DB status
@@ -97,13 +130,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   return (
     <div
       id="login-modal-overlay"
-      className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
-      onClick={onClose}
+      className={
+        isFullPage
+          ? "min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 flex items-center justify-center p-3 sm:p-6 overflow-y-auto"
+          : "fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200"
+      }
+      onClick={isFullPage ? undefined : onClose}
     >
       <div
         id="login-dialog-card"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+        className={
+          isFullPage
+            ? "bg-white rounded-2xl max-w-4xl w-full border border-slate-700/60 shadow-2xl overflow-hidden flex flex-col md:flex-row my-auto"
+            : "bg-white rounded-2xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
+        }
       >
         {/* Left Side: MOIL / SIH Brand Panel */}
         <div className="md:w-5/12 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
@@ -145,15 +186,65 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             </div>
           </div>
 
-          {/* Database Health Pill */}
-          <div className="mt-8 pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>{dbStatus?.status === 'connected' ? 'Geodatabase Online' : 'Database Ready'}</span>
+          {/* Database Health Pill & MongoDB Configuration Drawer */}
+          <div className="mt-8 pt-4 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    dbStatus?.mongo?.connected ? "bg-emerald-400" : "bg-blue-400"
+                  } animate-pulse`}
+                ></span>
+                <span className="font-semibold text-slate-200">
+                  {dbStatus?.mongo?.connected
+                    ? `MongoDB Atlas (${dbStatus?.mongo?.dbName})`
+                    : dbStatus?.storage || "Geodatabase Online"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMongoConfig(!showMongoConfig)}
+                className="text-[10px] text-blue-300 hover:text-white underline cursor-pointer"
+              >
+                {showMongoConfig ? "Close" : "Connect MongoDB"}
+              </button>
             </div>
-            <span className="font-mono text-[10px] text-slate-400">
-              {dbStatus?.verifiedTargetsCount || 3} Verified / 100 Targets
-            </span>
+
+            {/* Quick MongoDB URI entry form */}
+            {showMongoConfig && (
+              <form onSubmit={handleSaveMongo} className="mt-2 p-2.5 rounded-lg bg-slate-950/90 border border-slate-700 text-left">
+                <label className="block text-[10px] text-slate-300 font-semibold mb-1">
+                  MongoDB Connection URI:
+                </label>
+                <div className="flex gap-1.5">
+                  <input
+                    type="password"
+                    placeholder="mongodb+srv://user:pass@cluster..."
+                    value={mongoUriInput}
+                    onChange={(e) => setMongoUriInput(e.target.value)}
+                    className="flex-1 px-2 py-1 text-xs bg-slate-900 border border-slate-700 rounded text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSavingMongo}
+                    className="px-2.5 py-1 text-xs font-bold rounded bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer disabled:opacity-50"
+                  >
+                    {isSavingMongo ? "..." : "Connect"}
+                  </button>
+                </div>
+                {mongoSuccessMsg && (
+                  <p className="text-[10px] text-emerald-400 mt-1 font-medium">{mongoSuccessMsg}</p>
+                )}
+                <p className="text-[9px] text-slate-400 mt-1">
+                  Paste your MongoDB Atlas or Compass connection string to persist login accounts in MongoDB.
+                </p>
+              </form>
+            )}
+
+            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+              <span>{dbStatus?.usersCount || 4} Registered Users</span>
+              <span className="font-mono">{dbStatus?.verifiedTargetsCount || 3} Verified Targets</span>
+            </div>
           </div>
         </div>
 
@@ -170,7 +261,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                   Access geological prospectivity grids and mine dispatch telemetry
                 </p>
               </div>
-              {onClose && (
+              {onClose && !isFullPage && (
                 <button
                   onClick={onClose}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"

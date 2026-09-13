@@ -47,12 +47,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (savedUser) {
         setUser(JSON.parse(savedUser));
       } else {
-        // Default to logged-in user for seamless demo, but user can log out
-        setUser(DEFAULT_USER);
-        localStorage.setItem('mine_intel_auth_user', JSON.stringify(DEFAULT_USER));
+        setUser(null);
       }
     } catch {
-      setUser(DEFAULT_USER);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }

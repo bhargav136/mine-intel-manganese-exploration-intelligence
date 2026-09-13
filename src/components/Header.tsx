@@ -9,6 +9,7 @@ import {
   User,
   ShieldCheck,
   LogIn,
+  LogOut,
 } from 'lucide-react';
 import { getCustomApiKey } from '../lib/geminiApi';
 import { useAuth } from '../context/AuthContext';
@@ -32,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   selectedRegion = 'Balaghat, Madhya Pradesh',
   onRegionChange,
 }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [hasApiKey, setHasApiKey] = useState(false);
   const [isRegionDropdownOpen, setIsRegionDropdownOpen] = useState(false);
   const [dbTargetCount, setDbTargetCount] = useState(3);
@@ -201,6 +202,20 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="text-xs font-bold text-blue-600">Sign In</span>
               </>
             )}
+          </button>
+        )}
+
+        {/* Logout Button */}
+        {user && (
+          <button
+            type="button"
+            id="header-btn-logout"
+            onClick={logout}
+            className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-semibold transition-all bg-white shadow-2xs"
+            title="Log Out & Return to Login Screen"
+          >
+            <LogOut className="w-3.5 h-3.5 text-rose-500" />
+            <span className="hidden sm:inline">Logout</span>
           </button>
         )}
 
