@@ -7,6 +7,7 @@ import { ProspectivityExplorerView } from './components/ProspectivityExplorerVie
 import { FieldVerificationView } from './components/FieldVerificationView';
 import { ProductionIntelligenceView } from './components/ProductionIntelligenceView';
 import { CorrectiveActionsView } from './components/CorrectiveActionsView';
+import { WhatIfSimulator } from './components/WhatIfSimulator';
 import { ReportsImpactView } from './components/ReportsImpactView';
 import { DataHealthView } from './components/DataHealthView';
 import { AnalyzeAreaModal } from './components/AnalyzeAreaModal';
@@ -210,6 +211,10 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
               onToggleAction={handleToggleAction}
               onActionsChange={setCorrectiveActions}
             />
+          )}
+
+          {activeTab === 'what-if-simulator' && (
+            <WhatIfSimulator correctiveActions={correctiveActions} />
           )}
 
           {activeTab === 'reports-impact' && <ReportsImpactView />}

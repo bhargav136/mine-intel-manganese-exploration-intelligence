@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   BookOpen,
   Code,
+  FlaskConical,
 } from 'lucide-react';
 import { NavigationTab } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -87,6 +88,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: <Activity className="w-4 h-4" />,
       badge: '100 Targets',
       badgeColor: 'bg-indigo-100 text-indigo-800',
+    },
+    {
+      id: 'what-if-simulator',
+      label: 'What-If Simulator',
+      icon: <FlaskConical className="w-4 h-4" />,
+      badge: 'Live MT Calc',
+      badgeColor: 'bg-purple-100 text-purple-800 font-bold',
     },
   ];
 

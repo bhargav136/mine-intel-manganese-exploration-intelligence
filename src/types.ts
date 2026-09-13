@@ -6,6 +6,7 @@ export type NavigationTab =
   | 'field-verification'
   | 'production-intelligence'
   | 'corrective-actions'
+  | 'what-if-simulator'
   | 'reports-impact'
   | 'data-health'
   | 'source-code';
