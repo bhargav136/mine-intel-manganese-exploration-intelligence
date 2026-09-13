@@ -148,56 +148,53 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             : "bg-white rounded-2xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
         }
       >
-        {/* Left Side: MOIL Brand Panel */}
-        <div className="md:w-5/12 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
-          {/* Subtle grid watermark */}
-          <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] opacity-15 pointer-events-none" />
-
+        {/* Left Side: MOIL Brand Panel (Clean Light Theme) */}
+        <div className="md:w-5/12 bg-slate-50 border-r border-slate-200 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30">
+              <span className="px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
                 MOIL LIMITED · MINISTRY OF STEEL
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight text-slate-900">
               MINE-INTEL
             </h2>
-            <p className="text-xs text-blue-200/80 mt-1 font-medium">
+            <p className="text-xs text-slate-600 mt-1 font-medium">
               National AI/ML & Satellite Prospectivity Infrastructure
             </p>
 
-            <div className="mt-6 space-y-3 text-xs text-slate-300">
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="mt-6 space-y-3 text-xs text-slate-600">
+              <div className="flex items-start gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Spectral Mineral Inversion:</strong> ASTER SWIR (B12/B11) & Sentinel-2 manganese gossan mapping.
+                  <strong className="text-slate-900">Spectral Mineral Inversion:</strong> ASTER SWIR (B12/B11) & Sentinel-2 manganese gossan mapping.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Production Forecaster:</strong> Predictive SARIMA downtime & 750 MT constraint recovery engine.
+                  <strong className="text-slate-900">Production Forecaster:</strong> Predictive SARIMA downtime & 750 MT constraint recovery engine.
                 </span>
               </div>
-              <div className="flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white">Persistent Geodatabase:</strong> Live synchronization with central borehole assay records.
+                  <strong className="text-slate-900">Persistent Geodatabase:</strong> Live synchronization with central borehole assay records.
                 </span>
               </div>
             </div>
           </div>
 
           {/* Database Health Pill & MongoDB Configuration Drawer */}
-          <div className="mt-8 pt-4 border-t border-slate-800 text-[11px] text-slate-400 space-y-2">
-            <div className="flex items-center justify-between">
+          <div className="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-600 space-y-2">
+            <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
               <div className="flex items-center gap-2">
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    dbStatus?.mongo?.connected ? "bg-emerald-400" : "bg-blue-400"
+                    dbStatus?.mongo?.connected ? "bg-emerald-500" : "bg-blue-500"
                   } animate-pulse`}
                 ></span>
-                <span className="font-semibold text-slate-200">
+                <span className="font-semibold text-slate-800">
                   {dbStatus?.mongo?.connected
                     ? `MongoDB Atlas (${dbStatus?.mongo?.dbName})`
                     : dbStatus?.storage || "Geodatabase Online"}
@@ -206,7 +203,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <button
                 type="button"
                 onClick={() => setShowMongoConfig(!showMongoConfig)}
-                className="text-[10px] text-blue-300 hover:text-white underline cursor-pointer"
+                className="text-[10px] text-blue-600 hover:text-blue-800 font-bold underline cursor-pointer"
               >
                 {showMongoConfig ? "Close" : "Connect MongoDB"}
               </button>
@@ -215,7 +212,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             {/* Quick MongoDB URI entry form */}
             {showMongoConfig && (
               <form onSubmit={handleSaveMongo} className="mt-2 p-2.5 rounded-lg bg-slate-950/90 border border-slate-700 text-left">
-                <label className="block text-[10px] text-slate-300 font-semibold mb-1">
+                <label className="block text-[10px] text-slate-700 font-semibold mb-1">
                   MongoDB Connection URI:
                 </label>
                 <div className="flex gap-1.5">
@@ -224,26 +221,26 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                     placeholder="mongodb+srv://user:pass@cluster..."
                     value={mongoUriInput}
                     onChange={(e) => setMongoUriInput(e.target.value)}
-                    className="flex-1 px-2 py-1 text-xs bg-slate-900 border border-slate-700 rounded text-white placeholder-slate-500 focus:outline-none focus:border-blue-400 font-mono"
+                    className="flex-1 px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-mono"
                   />
                   <button
                     type="submit"
                     disabled={isSavingMongo}
-                    className="px-2.5 py-1 text-xs font-bold rounded bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer disabled:opacity-50"
                   >
                     {isSavingMongo ? "..." : "Connect"}
                   </button>
                 </div>
                 {mongoSuccessMsg && (
-                  <p className="text-[10px] text-emerald-400 mt-1 font-medium">{mongoSuccessMsg}</p>
+                  <p className="text-[10px] text-emerald-600 mt-1 font-medium">{mongoSuccessMsg}</p>
                 )}
-                <p className="text-[9px] text-slate-400 mt-1">
-                  Paste your MongoDB Atlas or Compass connection string to persist login accounts in MongoDB.
+                <p className="text-[9px] text-slate-500 mt-1">
+                  Paste your MongoDB Atlas connection string to persist login accounts in the cloud.
                 </p>
               </form>
             )}
 
-            <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+            <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1">
               <span>{dbStatus?.usersCount || 4} Registered Users</span>
               <span className="font-mono">{dbStatus?.verifiedTargetsCount || 3} Verified Targets</span>
             </div>

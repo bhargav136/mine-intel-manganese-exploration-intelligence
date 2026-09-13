@@ -184,11 +184,11 @@ export const ProjectOverviewView: React.FC<ProjectOverviewViewProps> = ({ onNavi
           </div>
 
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight">
-            MINE-INTEL: Clear Project Architecture & Working Flow
+            MINE-INTEL: Project Overview & Complete Working Flow
           </h1>
 
           <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            A straightforward, data-driven platform built for MOIL Limited: Ingests <strong>9 comprehensive input streams</strong> (Mine, Geological, Equipment, Weather, Satellite data) and delivers <strong>4 high-impact outputs</strong> (Reserve Map, Production Forecast, Shortfall Alert, and Corrective Action).
+            A straightforward, data-driven platform built for MOIL Limited: <strong>Inputs = Mine + Geological + Equipment + Weather + Satellite data</strong> ➔ <strong>Outputs = Reserve Map + Production Forecast + Shortfall Alert + Corrective Action</strong>. Designed for instant clarity at a single glance.
           </p>
 
           {/* 4 Core Quantitative Highlights */}

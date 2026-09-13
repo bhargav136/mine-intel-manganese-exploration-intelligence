@@ -50,23 +50,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }[] = [
     {
       id: 'project-overview',
-      label: 'Flow & Architecture',
+      label: 'Project Overview',
       icon: <BookOpen className="w-4 h-4" />,
-      badge: 'Inputs ➔ Outputs',
-      badgeColor: 'bg-blue-100 text-blue-800 font-bold',
-    },
-    {
-      id: 'command-center',
-      label: 'Big Reserve Map (GIS)',
-      icon: <MapIcon className="w-4 h-4" />,
-      badge: 'Leaflet Satellite',
+      badge: 'Working Flow',
       badgeColor: 'bg-emerald-100 text-emerald-800 font-bold',
     },
     {
+      id: 'command-center',
+      label: 'Manganese Reserve Map',
+      icon: <MapIcon className="w-4 h-4" />,
+      badge: 'Leaflet Satellite',
+      badgeColor: 'bg-blue-100 text-blue-800 font-bold',
+    },
+    {
       id: 'production-intelligence',
-      label: 'Production & Shortfall',
+      label: 'Production Forecast',
       icon: <TrendingUp className="w-4 h-4" />,
-      badge: '-18% Risk Alert',
+      badge: '-18% Shortfall',
       badgeColor: 'bg-rose-100 text-rose-800 font-bold',
     },
     {
