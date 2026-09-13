@@ -1,0 +1,6 @@
+{
+  "name": "MINE-INTEL - Manganese Exploration Intelligence",
+  "description": "AI/ML and Space Technology platform for MOIL Limited to identify manganese reserves, predict production shortfalls, and recommend corrective operational actions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
