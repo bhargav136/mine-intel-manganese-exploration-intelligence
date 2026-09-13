@@ -15,6 +15,7 @@ import { TargetDetailModal } from './components/TargetDetailModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { PreviousAnalysesModal } from './components/PreviousAnalysesModal';
 import { LoginPage } from './components/LoginPage';
+import { LandingPage } from './components/LandingPage';
 import { DatabaseModal } from './components/DatabaseModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -240,10 +241,11 @@ function DashboardView() {
 
 function MainApp() {
   const { user, isLoading } = useAuth();
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'register'>('home');
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen bg-[#F8FAFC] flex items-center justify-center">
+      <div className="h-screen w-screen bg-[#f5f8fd] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
           <span className="text-xs text-slate-500 font-medium">Loading MOIL MINE-INTEL...</span>
@@ -252,11 +254,84 @@ function MainApp() {
     );
   }
 
-  if (!user) {
-    return <LoginPage isOpen={true} isFullPage={true} />;
+  // If user is authenticated, go straight to Dashboard!
+  if (user) {
+    return <DashboardView />;
   }
 
-  return <DashboardView />;
+  // If user clicked Login
+  if (currentView === 'login') {
+    return (
+      <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
+        <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
+          <button
+            onClick={() => setCurrentView('home')}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
+              M
+            </div>
+            <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
+          </button>
+          <button
+            onClick={() => setCurrentView('home')}
+            className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+          >
+            &larr; Back to Home
+          </button>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-4">
+          <LoginPage
+            isOpen={true}
+            isFullPage={true}
+            initialTab="signin"
+            onClose={() => setCurrentView('home')}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // If user clicked Register
+  if (currentView === 'register') {
+    return (
+      <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
+        <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
+          <button
+            onClick={() => setCurrentView('home')}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
+              M
+            </div>
+            <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
+          </button>
+          <button
+            onClick={() => setCurrentView('home')}
+            className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+          >
+            &larr; Back to Home
+          </button>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-4">
+          <LoginPage
+            isOpen={true}
+            isFullPage={true}
+            initialTab="signup"
+            onClose={() => setCurrentView('home')}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Default: Public Landing Page matching digital-assets-management.onrender.com
+  return (
+    <LandingPage
+      onOpenLogin={() => setCurrentView('login')}
+      onOpenRegister={() => setCurrentView('register')}
+    />
+  );
 }
 
 export default function App() {
