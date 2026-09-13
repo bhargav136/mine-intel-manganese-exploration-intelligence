@@ -246,6 +246,13 @@ function MainApp() {
   const { user, isLoading } = useAuth();
   const [currentView, setCurrentView] = useState<'home' | 'login' | 'register'>('login');
 
+  // When user logs out, always go back to login page
+  useEffect(() => {
+    const handleLogout = () => setCurrentView('login');
+    window.addEventListener('mine_intel_logout', handleLogout);
+    return () => window.removeEventListener('mine_intel_logout', handleLogout);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="h-screen w-screen bg-[#f5f8fd] flex items-center justify-center">

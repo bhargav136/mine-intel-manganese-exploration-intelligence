@@ -104,7 +104,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     localStorage.removeItem('mine_intel_auth_user');
     localStorage.removeItem('mine_intel_auth_token');
-    // Landing page will show automatically since user becomes null
+    // Dispatch event so MainApp resets to login view
+    window.dispatchEvent(new CustomEvent('mine_intel_logout'));
   };
 
   const switchUser = (newUser: AuthUser) => {
