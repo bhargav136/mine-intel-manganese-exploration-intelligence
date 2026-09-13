@@ -253,6 +253,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenLogin, onOpenReg
             </button>
           </div>
 
+          {/* Official Demo Credentials Pill */}
+          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 shadow-2xs">
+            <span className="font-bold flex items-center gap-1 text-amber-950">
+              🔑 Demo Access:
+            </span>
+            <span>Email: <code className="font-mono font-bold text-blue-700 bg-white px-1.5 py-0.5 rounded border border-amber-200">dr.sharma@moil.in</code></span>
+            <span>Password: <code className="font-mono font-bold text-slate-800 bg-white px-1.5 py-0.5 rounded border border-amber-200">password123</code></span>
+            <span className="hidden sm:inline text-amber-700 text-[11px]">(or use 1-click personas on login)</span>
+          </div>
+
           {/* Quick stats row */}
           <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {stats.map((s) => (

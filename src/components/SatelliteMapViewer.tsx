@@ -15,9 +15,13 @@ const MINE_DATA: Record<string, {
   boreholes: { id: string; mnGrade: number; depth: number; lithology: string; recovery: number }[];
   satellite: { ndvi: string; lst: string; moisture: string; insar: string; rainfall: string; sensor: string };
 }> = {
-  "Balaghat, Madhya Pradesh": {
-    label: "Balaghat Mine", center: [21.8129, 80.1837], district: "Balaghat", state: "Madhya Pradesh",
-    formation: "Mansar Formation, Sausar Group (Quartz-Mica Schist)", grade: "44.5",
+  balaghat: {
+    label: "Balaghat Mine (Asia's Deepest Manganese Mine)",
+    center: [21.8129, 80.1837],
+    district: "Balaghat",
+    state: "Madhya Pradesh",
+    formation: "Mansar Formation, Sausar Group (Quartz-Mica Schist)",
+    grade: "44.5",
     boreholes: [
       { id: "BH-BG-104", mnGrade: 46.8, depth: 168.5, lithology: "Braunite/Pyrolusite Ore", recovery: 96 },
       { id: "BH-BG-105", mnGrade: 43.2, depth: 228.0, lithology: "Braunite/Pyrolusite Ore", recovery: 94 },
@@ -27,38 +31,65 @@ const MINE_DATA: Record<string, {
     ],
     satellite: { ndvi: "0.31", lst: "34.2°C", moisture: "38.5%", insar: "-1.2 mm/yr", rainfall: "36.4 mm", sensor: "Sentinel-2A" },
   },
-  "Bhandara, Maharashtra": {
-    label: "Dongri Buzurg Mine", center: [21.5542, 79.6911], district: "Bhandara", state: "Maharashtra",
-    formation: "Sitasaongi & Mansar Phyllites (Pyrolusite Ore)", grade: "42.1",
+  bhandara: {
+    label: "Dongri Buzurg & Chikla Mines",
+    center: [21.5542, 79.6911],
+    district: "Bhandara",
+    state: "Maharashtra",
+    formation: "Sitasaongi & Mansar Phyllites (Battery-Grade Dioxide Ore)",
+    grade: "46.2",
     boreholes: [
-      { id: "BH-DB-201", mnGrade: 44.1, depth: 58.5, lithology: "Braunite/Pyrolusite Ore", recovery: 95 },
-      { id: "BH-DB-202", mnGrade: 40.5, depth: 84.0, lithology: "Braunite/Pyrolusite Ore", recovery: 93 },
-      { id: "BH-DB-203", mnGrade: 36.2, depth: 104.0, lithology: "Sitasaongi Quartzite", recovery: 88 },
+      { id: "BH-DB-201", mnGrade: 46.2, depth: 58.5, lithology: "High-grade Braunite/Pyrolusite Ore", recovery: 95 },
+      { id: "BH-DB-202", mnGrade: 42.5, depth: 84.0, lithology: "Pyrolusite Oxide Lens", recovery: 93 },
+      { id: "BH-DB-203", mnGrade: 38.2, depth: 104.0, lithology: "Sitasaongi Quartzite", recovery: 88 },
+      { id: "BH-CK-204", mnGrade: 44.8, depth: 132.0, lithology: "Chikla Underground Braunite Strike", recovery: 96 },
     ],
     satellite: { ndvi: "0.22", lst: "38.9°C", moisture: "58.2%", insar: "-3.8 mm/yr", rainfall: "72.8 mm", sensor: "Landsat-9 OLI" },
   },
-  "Nagpur, Maharashtra": {
-    label: "Mansar / Kandri Mine", center: [21.4019, 79.2715], district: "Nagpur", state: "Maharashtra",
-    formation: "Lohangi Calc-Silicate & Mansar Schist Contact", grade: "40.8",
+  nagpur: {
+    label: "Mansar, Kandri & Gumgaon Mines",
+    center: [21.4019, 79.2715],
+    district: "Nagpur",
+    state: "Maharashtra",
+    formation: "Lohangi Calc-Silicate & Mansar Schist Contact (Siliceous Braunite)",
+    grade: "42.8",
     boreholes: [
       { id: "BH-NK-301", mnGrade: 46.2, depth: 95.0, lithology: "Braunite/Pyrolusite Ore", recovery: 97 },
-      { id: "BH-NK-302", mnGrade: 38.6, depth: 220.0, lithology: "Gondite Horizon", recovery: 90 },
-      { id: "BH-NK-303", mnGrade: 40.8, depth: 290.0, lithology: "Braunite/Pyrolusite Ore", recovery: 93 },
+      { id: "BH-NK-302", mnGrade: 41.6, depth: 220.0, lithology: "Gondite Horizon", recovery: 90 },
+      { id: "BH-NK-303", mnGrade: 43.8, depth: 290.0, lithology: "Gumgaon Underground Bed", recovery: 93 },
+      { id: "BH-NK-304", mnGrade: 44.1, depth: 175.0, lithology: "Kandri Highwall Braunite", recovery: 94 },
     ],
     satellite: { ndvi: "0.35", lst: "33.5°C", moisture: "26.8%", insar: "-0.8 mm/yr", rainfall: "8.2 mm", sensor: "Sentinel-2A" },
   },
-  "Chhindwara, Madhya Pradesh": {
-    label: "Tirodi Mine", center: [21.6811, 79.7122], district: "Balaghat", state: "Madhya Pradesh",
-    formation: "Tirodi Biotite Gneiss & Mansar Schist Contact", grade: "39.5",
+  chhindwara: {
+    label: "Tirodi & Sitapatore Mines",
+    center: [21.6811, 79.7122],
+    district: "Chhindwara / Balaghat Border",
+    state: "Madhya Pradesh",
+    formation: "Tirodi Biotite Gneiss & Mansar Schist Contact (Coarse Braunite)",
+    grade: "40.5",
     boreholes: [
-      { id: "BH-TR-401", mnGrade: 39.5, depth: 185.0, lithology: "Braunite/Pyrolusite Ore", recovery: 91 },
-      { id: "BH-TR-402", mnGrade: 37.2, depth: 145.0, lithology: "Gondite Horizon", recovery: 88 },
+      { id: "BH-TR-401", mnGrade: 42.5, depth: 185.0, lithology: "Tirodi Braunite Bed", recovery: 92 },
+      { id: "BH-TR-402", mnGrade: 39.2, depth: 145.0, lithology: "Gondite Marker Horizon", recovery: 88 },
+      { id: "BH-TR-403", mnGrade: 43.1, depth: 210.0, lithology: "Sitapatore Pegmatite Braunite", recovery: 91 },
     ],
     satellite: { ndvi: "0.29", lst: "36.1°C", moisture: "46.1%", insar: "-2.1 mm/yr", rainfall: "48.5 mm", sensor: "Sentinel-2A" },
   },
 };
 
-const DEFAULT_REGION = "Balaghat, Madhya Pradesh";
+function getMineData(regionString?: string) {
+  const s = (regionString || "").toLowerCase();
+  if (s.includes("bhandara") || s.includes("dongri") || s.includes("chikla")) {
+    return MINE_DATA.bhandara;
+  }
+  if (s.includes("nagpur") || s.includes("mansar") || s.includes("kandri") || s.includes("gumgaon")) {
+    return MINE_DATA.nagpur;
+  }
+  if (s.includes("chhindwara") || s.includes("tirodi") || s.includes("sitapatore")) {
+    return MINE_DATA.chhindwara;
+  }
+  return MINE_DATA.balaghat;
+}
 
 export const SatelliteMapViewer: React.FC<SatelliteMapViewerProps> = ({ selectedRegion }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -74,8 +105,7 @@ export const SatelliteMapViewer: React.FC<SatelliteMapViewerProps> = ({ selected
   const [mouseCoords, setMouseCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedFeature, setSelectedFeature] = useState<any>(null);
 
-  const region = selectedRegion && MINE_DATA[selectedRegion] ? selectedRegion : DEFAULT_REGION;
-  const mine = MINE_DATA[region];
+  const mine = getMineData(selectedRegion);
   const [centerLat, centerLng] = mine.center;
 
   // Initialize Leaflet map once
@@ -199,7 +229,7 @@ export const SatelliteMapViewer: React.FC<SatelliteMapViewerProps> = ({ selected
           .addTo(lg);
       });
     }
-  }, [activeLayer, baseMapType, layerOpacity, showBoreholes, showConcessionBoundary, region]);
+  }, [activeLayer, baseMapType, layerOpacity, showBoreholes, showConcessionBoundary, selectedRegion, centerLat, centerLng]);
 
   const LAYERS = [
     { key: "rgb", label: "True Color (RGB)", Icon: Satellite, ac: "bg-cyan-600" },

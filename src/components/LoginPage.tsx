@@ -363,6 +363,48 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </div>
             </div>
 
+            {/* Official Demo Credentials Quick Box */}
+            <div className="mb-4 p-3 rounded-xl bg-amber-50/80 border border-amber-200 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-amber-900 flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                  Official Demo Access Credentials
+                </span>
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                  Pre-filled & Verified
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('dr.sharma@moil.in');
+                    setPassword('password123');
+                  }}
+                  className="bg-white p-2 rounded-lg border border-amber-200 hover:border-amber-400 hover:bg-amber-100/50 transition-colors text-left cursor-pointer"
+                >
+                  <div className="font-bold text-slate-900">Dr. Alok Sharma (Chief Geologist)</div>
+                  <div className="text-slate-600 text-[10px] font-mono">Email: <span className="text-blue-700 font-bold">dr.sharma@moil.in</span></div>
+                  <div className="text-slate-600 text-[10px] font-mono">Password: <span className="text-slate-800 font-bold">password123</span></div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('vikram.rathore@moil.in');
+                    setPassword('password123');
+                  }}
+                  className="bg-white p-2 rounded-lg border border-amber-200 hover:border-amber-400 hover:bg-amber-100/50 transition-colors text-left cursor-pointer"
+                >
+                  <div className="font-bold text-slate-900">Vikram Rathore (Mine Supt.)</div>
+                  <div className="text-slate-600 text-[10px] font-mono">Email: <span className="text-blue-700 font-bold">vikram.rathore@moil.in</span></div>
+                  <div className="text-slate-600 text-[10px] font-mono">Password: <span className="text-slate-800 font-bold">password123</span></div>
+                </button>
+              </div>
+              <div className="text-[10px] text-amber-800 mt-1.5 font-medium flex items-center justify-between">
+                <span>Click any card above to populate inputs, or click a MOIL Persona above for 1-click auth.</span>
+              </div>
+            </div>
+
             {/* Tab switch */}
             <div className="flex border-b border-slate-200 mb-4">
               <button

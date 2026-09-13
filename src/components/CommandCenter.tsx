@@ -83,12 +83,12 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
         <div className="flex items-center gap-2.5">
           <AlertCircle className="w-4 h-4 text-[#D97706] shrink-0" />
           <span>
-            MOIL AI MINING INTELLIGENCE: Live multi-satellite synthesis, SARIMA shortfall forecasting & prescriptive dispatch optimization.
+            DEMO / SIMULATED DATA: Values shown are for illustrative prototype purposes.
           </span>
         </div>
         <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          BALAGHAT SAUSAR BELT
+          {selectedRegion.toUpperCase()}
         </span>
       </div>
 
