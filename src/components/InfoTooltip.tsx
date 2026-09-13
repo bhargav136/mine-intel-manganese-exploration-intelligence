@@ -2,15 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import { Info } from "lucide-react";
 
 export const SCIENTIFIC_TERMS: Record<string, string> = {
-  ndvi: "Measures plant health from satellite images; unusual patterns can hint at mineral-rich soil below.",
-  lst: "Ground surface heat measured by satellite; certain minerals affect how the ground retains heat.",
-  soilMoisture: "How much water the soil holds; helps rule out or confirm certain rock formations.",
-  swir: "A satellite signal that helps detect manganese-bearing minerals on the surface.",
-  magneticAnomaly: "Tiny variations in the Earth's magnetic field that can indicate dense ore bodies underground.",
-  gravityAnomaly: "Tiny variations in the Earth's gravity field that can indicate dense ore bodies underground.",
-  confidence: "How sure the model is about this prediction, from 0 to 100%.",
-  grade: "The percentage of manganese content found in the ore sample — higher is better quality.",
-  insar: "Satellite radar measuring millimeter-scale slope stability and pit ground motion.",
+  ndvi: "Measures plant health from orbit; stressed or stunted vegetation often signals metal-rich soil and shallow ore below.",
+  lst: "Ground surface temperature; manganese-bearing rocks heat up and cool down at different rates than ordinary soil.",
+  soilMoisture: "How much moisture the soil retains; helps differentiate hard ore outcrops from wet clay and loose dirt.",
+  swir: "Short-wave infrared satellite reflectance that highlights manganese minerals and alteration zones exposed on the surface.",
+  magneticAnomaly: "Underground magnetic variations from drone and satellite surveys that pinpoint hidden magnetic and iron-manganese rock bodies.",
+  gravityAnomaly: "Subtle differences in Earth's gravity pull that detect exceptionally dense manganese ore bodies buried deep underground.",
+  confidence: "How confident the multi-sensor AI model is in this reserve prediction, scored from 0 to 100%.",
+  grade: "Percentage of pure manganese in the ore; grades over 40% represent premium steelmaking ore.",
+  insar: "Satellite radar measuring millimeter-level ground shifts to warn of slope instability or pit subsidence.",
 };
 
 interface InfoTooltipProps {

@@ -28,9 +28,13 @@ import { NavigationTab } from '../types';
 
 interface ProjectOverviewViewProps {
   onNavigateTab: (tab: NavigationTab) => void;
+  appliedRecoveryMT?: number;
 }
 
-export const ProjectOverviewView: React.FC<ProjectOverviewViewProps> = ({ onNavigateTab }) => {
+export const ProjectOverviewView: React.FC<ProjectOverviewViewProps> = ({
+  onNavigateTab,
+  appliedRecoveryMT = 980,
+}) => {
   const [activeDataCategory, setActiveDataCategory] = useState<'inputs' | 'outputs'>('inputs');
 
   const inputCategories = [
@@ -154,7 +158,7 @@ export const ProjectOverviewView: React.FC<ProjectOverviewViewProps> = ({ onNavi
       badge: 'Prescriptive AI',
       icon: <Sparkles className="w-5 h-5 text-emerald-600" />,
       desc: 'Quantified instructions to recover lost production: Redeploy excavator EX-04, adjust blast timing, and activate dewatering pumps.',
-      stat: '+980 MT Recovered (+8%)',
+      stat: `+${appliedRecoveryMT.toLocaleString()} MT Recovered (+8%)`,
     },
     {
       title: 'Interactive MOIL Dashboard',
@@ -213,7 +217,9 @@ export const ProjectOverviewView: React.FC<ProjectOverviewViewProps> = ({ onNavi
 
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
               <div className="text-xs text-slate-500 font-semibold">Recovered via AI Action</div>
-              <div className="text-xl sm:text-2xl font-black text-blue-600 font-sans mt-0.5">+980 MT</div>
+              <div className="text-xl sm:text-2xl font-black text-blue-600 font-sans mt-0.5">
+                +{appliedRecoveryMT.toLocaleString()} MT
+              </div>
               <div className="text-[10px] text-slate-400 font-medium">+8% Output Restored</div>
             </div>
           </div>
@@ -275,7 +281,7 @@ export const ProjectOverviewView: React.FC<ProjectOverviewViewProps> = ({ onNavi
             {
               step: 'Step 5',
               title: 'Corrective Dispatch',
-              desc: 'Equipment redeployment, blasting reschedule, and dewatering (+980 MT recovered)',
+              desc: `Equipment redeployment, blasting reschedule, and dewatering (+${appliedRecoveryMT.toLocaleString()} MT recovered)`,
               color: 'border-emerald-300 bg-emerald-50/50',
               badge: 'Execution on Map',
               icon: <Sparkles className="w-5 h-5 text-emerald-600" />,

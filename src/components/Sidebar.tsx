@@ -26,6 +26,7 @@ interface SidebarProps {
   onOpenLoginModal?: () => void;
   onOpenDatabaseModal?: () => void;
   selectedRegion?: string;
+  appliedRecoveryMT?: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -36,6 +37,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenLoginModal,
   onOpenDatabaseModal,
   selectedRegion = 'Balaghat, Madhya Pradesh',
+  appliedRecoveryMT = 980,
 }) => {
   const { user } = useAuth();
 
@@ -76,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'corrective-actions',
       label: 'Recommended Actions',
       icon: <Wrench className="w-4 h-4" />,
-      badge: '+980 MT Recovery',
+      badge: appliedRecoveryMT > 0 ? `+${appliedRecoveryMT.toLocaleString()} MT Recovery` : '0 MT Recovery',
       badgeColor: 'bg-amber-100 text-amber-800 font-bold',
     },
     {

@@ -24,12 +24,14 @@ interface ProductionIntelligenceViewProps {
   mineSites: MineSite[];
   constraints: ProductionConstraint[];
   onNavigateToCorrectiveActions: () => void;
+  appliedRecoveryMT?: number;
 }
 
 export const ProductionIntelligenceView: React.FC<ProductionIntelligenceViewProps> = ({
   mineSites,
   constraints,
   onNavigateToCorrectiveActions,
+  appliedRecoveryMT = 980,
 }) => {
   const [selectedMineId, setSelectedMineId] = useState<string>('balaghat');
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
@@ -215,7 +217,7 @@ export const ProductionIntelligenceView: React.FC<ProductionIntelligenceViewProp
               Recoverable Capacity
             </div>
             <div className="text-2xl font-black text-emerald-600 mt-1 font-sans">
-              +750 MT
+              +{appliedRecoveryMT.toLocaleString()} MT
             </div>
           </div>
           <button

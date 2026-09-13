@@ -34,6 +34,7 @@ interface CommandCenterProps {
   onOpenApiKeyModal?: (tab?: 'gemini' | 'map') => void;
   onNavigateToProduction?: () => void;
   selectedRegion?: string;
+  appliedRecoveryMT?: number;
 }
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
@@ -46,6 +47,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   onOpenApiKeyModal,
   onNavigateToProduction,
   selectedRegion = 'Balaghat, Madhya Pradesh',
+  appliedRecoveryMT = 980,
 }) => {
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -256,7 +258,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
                 🎯 AI Action Recommendation
               </span>
               <span className="text-[10px] font-black text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-400/30">
-                +8% Recovery (+980 MT)
+                +8% Recovery (+{appliedRecoveryMT.toLocaleString()} MT)
               </span>
             </div>
 

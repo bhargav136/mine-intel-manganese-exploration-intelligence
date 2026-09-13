@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { CommandCenter } from './components/CommandCenter';
@@ -29,7 +29,7 @@ import {
 } from './data/mockData';
 import { ProjectOverviewView } from './components/ProjectOverviewView';
 import { SourceCodeView } from './components/SourceCodeView';
-import { NavigationTab, ExplorationTarget } from './types';
+import { NavigationTab, ExplorationTarget, CorrectiveActionItem } from './types';
 
 function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
   const { user, isLoginModalOpen, openLoginModal, closeLoginModal } = useAuth();
@@ -43,6 +43,25 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
   const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState(false);
   const [inspectingTarget, setInspectingTarget] = useState<ExplorationTarget | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string>('Balaghat, Madhya Pradesh');
+  const [correctiveActions, setCorrectiveActions] = useState<CorrectiveActionItem[]>(CORRECTIVE_ACTIONS);
+
+  const appliedRecoveryMT = useMemo(() => {
+    return correctiveActions
+      .filter((a) => a.status === 'Applied')
+      .reduce((sum, a) => sum + a.impactRecoveryMT, 0);
+  }, [correctiveActions]);
+
+  const handleToggleAction = (id: string) => {
+    setCorrectiveActions((prev) =>
+      prev.map((a) => {
+        if (a.id === id) {
+          const newStatus = a.status === 'Applied' ? 'Recommended' : 'Applied';
+          return { ...a, status: newStatus };
+        }
+        return a;
+      })
+    );
+  };
 
   // Sync with central database on mount
   useEffect(() => {
@@ -118,6 +137,7 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
           onSelectTab={setActiveTab}
           onTabChange={setActiveTab}
           selectedRegion={selectedRegion}
+          appliedRecoveryMT={appliedRecoveryMT}
         />
       )}
 
@@ -135,7 +155,10 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
         {/* Scrollable View Content */}
         <main className="flex-1 overflow-y-auto">
           {activeTab === 'project-overview' && (
-            <ProjectOverviewView onNavigateTab={setActiveTab} />
+            <ProjectOverviewView
+              onNavigateTab={setActiveTab}
+              appliedRecoveryMT={appliedRecoveryMT}
+            />
           )}
 
           {activeTab === 'command-center' && (
@@ -148,6 +171,7 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
               onVerifyTarget={handleVerifyTarget}
               onNavigateToProduction={() => setActiveTab('production-intelligence')}
               selectedRegion={selectedRegion}
+              appliedRecoveryMT={appliedRecoveryMT}
             />
           )}
 
@@ -176,11 +200,16 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
               mineSites={MOIL_MINE_SITES}
               constraints={CURRENT_CONSTRAINTS}
               onNavigateToCorrectiveActions={() => setActiveTab('corrective-actions')}
+              appliedRecoveryMT={appliedRecoveryMT}
             />
           )}
 
           {activeTab === 'corrective-actions' && (
-            <CorrectiveActionsView initialActions={CORRECTIVE_ACTIONS} />
+            <CorrectiveActionsView
+              actions={correctiveActions}
+              onToggleAction={handleToggleAction}
+              onActionsChange={setCorrectiveActions}
+            />
           )}
 
           {activeTab === 'reports-impact' && <ReportsImpactView />}

@@ -520,7 +520,7 @@ export const CORRECTIVE_ACTIONS: CorrectiveActionItem[] = [
     impactRecoveryMT: 380,
     urgency: 'Immediate',
     costRupees: '₹18,000 (Fuel delta)',
-    status: 'Recommended',
+    status: 'Applied',
     rationale: 'Matches shovel loading rate at South bench while bypass haul road #3 remains well-drained with aggregate surface.',
   },
   {
@@ -528,10 +528,10 @@ export const CORRECTIVE_ACTIONS: CorrectiveActionItem[] = [
     title: 'Adjust Pre-Split Blast Burden to 3.0m and Optimize Delay Timing',
     description: 'Electronic detonator sequence tuning to 17ms inter-hole delay; increases rock fragmentation index by 24% to eliminate boulder secondary breaking.',
     category: 'Blasting Optimization',
-    impactRecoveryMT: 220,
+    impactRecoveryMT: 250,
     urgency: 'Within Shift',
     costRupees: '₹42,000 (Detonator upgrades)',
-    status: 'Recommended',
+    status: 'Applied',
     rationale: 'Keeps peak particle velocity (PPV) strictly at 3.8 mm/s well below the 5.0 mm/s DGMS boundary limit while improving muckpile digestion.',
   },
   {
@@ -542,7 +542,7 @@ export const CORRECTIVE_ACTIONS: CorrectiveActionItem[] = [
     impactRecoveryMT: 260,
     urgency: 'Immediate',
     costRupees: '₹25,000 (Power tariff)',
-    status: 'Applied',
+    status: 'Recommended',
     rationale: 'Maintains haul ramp dry crest clearance, avoiding 6 hours of pit stoppage during the night shift.',
   },
   {
@@ -553,7 +553,7 @@ export const CORRECTIVE_ACTIONS: CorrectiveActionItem[] = [
     impactRecoveryMT: 350,
     urgency: 'Next 24h',
     costRupees: '₹32,000 (Front-end loader handling)',
-    status: 'Recommended',
+    status: 'Applied',
     rationale: 'Prevents railway demurrage charges and guarantees contractual delivery grade to SAIL.',
   },
 ];
