@@ -140,6 +140,7 @@ function DashboardView() {
               verifiedCount={verifiedCount}
               onVerifyTarget={handleVerifyTarget}
               onOpenApiKeyModal={handleOpenApiKey}
+              onNavigateToProduction={() => setActiveTab('production-intelligence')}
             />
           )}
 

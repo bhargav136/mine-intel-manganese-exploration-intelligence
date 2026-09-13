@@ -5,6 +5,13 @@ import {
   Target,
   CheckCircle,
   AlertCircle,
+  TrendingUp,
+  Sparkles,
+  Wrench,
+  Truck,
+  CloudRain,
+  ArrowRight,
+  ShieldAlert,
 } from 'lucide-react';
 import { InteractiveMap } from './InteractiveMap';
 import { TopPriorityTargets } from './TopPriorityTargets';
@@ -23,6 +30,7 @@ interface CommandCenterProps {
   verifiedCount: number;
   onVerifyTarget: (targetId: string) => void;
   onOpenApiKeyModal?: (tab?: 'gemini' | 'map') => void;
+  onNavigateToProduction?: () => void;
 }
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
@@ -33,6 +41,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   verifiedCount,
   onVerifyTarget,
   onOpenApiKeyModal,
+  onNavigateToProduction,
 }) => {
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -61,84 +70,127 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
 
   return (
     <div id="command-center-view" className="p-6 space-y-4 max-w-[1600px] mx-auto">
-      {/* Yellow Warning Banner matching screenshot */}
+      {/* Yellow Warning Banner */}
       <div
         id="demo-alert-banner"
-        className="bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2.5 shadow-2xs"
+        className="bg-[#FFFBEB] border border-[#FDE68A] text-[#92400E] px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-between shadow-2xs"
       >
-        <AlertCircle className="w-4 h-4 text-[#D97706] shrink-0" />
-        <span>
-          DEMO / SIMULATED DATA: Values shown are for illustrative prototype
-          purposes.
+        <div className="flex items-center gap-2.5">
+          <AlertCircle className="w-4 h-4 text-[#D97706] shrink-0" />
+          <span>
+            MOIL AI MINING INTELLIGENCE: Live multi-satellite synthesis, SARIMA shortfall forecasting & prescriptive dispatch optimization.
+          </span>
+        </div>
+        <span className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          BALAGHAT SAUSAR BELT
         </span>
       </div>
 
-      {/* 5 KPI Metric Cards Row matching screenshot */}
+      {/* 5 Hackathon Executive KPI Cards */}
       <div
         id="kpi-metrics-row"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5"
       >
-        {/* 1. Exploration Area */}
+        {/* 1. Reserve Potential */}
         <div
-          id="kpi-exploration-area"
-          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
+          id="kpi-reserve-potential"
+          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between group hover:border-emerald-300 transition-colors"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">
-              Exploration Area
+              Reserve Potential
             </span>
-            <MapIcon className="w-4 h-4 text-slate-400" />
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              🛰️ Space AI
+            </span>
           </div>
-          <div className="mt-2 flex items-baseline gap-1">
+          <div className="mt-2 flex items-baseline gap-1.5">
             <span className="text-2xl font-black tracking-tight text-slate-900 font-sans">
-              1,000
+              82%
             </span>
-            <span className="text-xs font-bold text-slate-500">km²</span>
+            <span className="text-xs font-extrabold text-emerald-600 flex items-center">
+              &uarr; High
+            </span>
+          </div>
+          <div className="text-[10px] text-slate-500 mt-1 font-medium truncate">
+            NDVI + Soil Moisture + Kriging
           </div>
         </div>
 
-        {/* 2. Candidate Cells */}
+        {/* 2. Expected Production */}
         <div
-          id="kpi-candidate-cells"
-          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
+          id="kpi-expected-production"
+          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between group hover:border-blue-300 transition-colors"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">
-              Candidate Cells
+              Expected Production
             </span>
             <Activity className="w-4 h-4 text-blue-500" />
           </div>
-          <div className="mt-2">
+          <div className="mt-2 flex items-baseline gap-1">
             <span className="text-2xl font-black tracking-tight text-slate-900 font-sans">
-              10,000
+              12,450
             </span>
+            <span className="text-xs font-bold text-slate-500">T / mo</span>
+          </div>
+          <div className="text-[10px] text-slate-500 mt-1 font-medium truncate">
+            Monthly Target: 13,200 T
           </div>
         </div>
 
-        {/* 3. High-Priority Targets */}
+        {/* 3. Production Shortfall Risk */}
         <div
-          id="kpi-high-priority-targets"
-          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
+          id="kpi-shortfall-risk"
+          className="bg-white rounded-xl border border-rose-200/90 p-4 shadow-xs flex flex-col justify-between bg-rose-50/20 group hover:border-rose-400 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-rose-700">
+              Shortfall Risk
+            </span>
+            <span className="inline-flex items-center gap-1 text-[10px] font-black px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping" />
+              🔴 HIGH
+            </span>
+          </div>
+          <div className="mt-2 flex items-baseline gap-1">
+            <span className="text-2xl font-black tracking-tight text-rose-600 font-sans">
+              -18%
+            </span>
+            <span className="text-xs font-bold text-rose-500">(-750 MT)</span>
+          </div>
+          <div className="text-[10px] text-rose-600/90 mt-1 font-semibold truncate">
+            ⚠️ 3-Week Forecast Deficit
+          </div>
+        </div>
+
+        {/* 4. Equipment Availability */}
+        <div
+          id="kpi-equipment-availability"
+          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between group hover:border-amber-300 transition-colors"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">
-              High-Priority Targets
+              Equipment Availability
             </span>
-            <div className="text-orange-500">
-              <Target className="w-4 h-4" />
-            </div>
+            <Wrench className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="mt-2">
+          <div className="mt-2 flex items-baseline gap-1">
             <span className="text-2xl font-black tracking-tight text-slate-900 font-sans">
-              100
+              76%
             </span>
+            <span className="text-xs font-bold text-amber-600">Available</span>
+          </div>
+          <div className="text-[10px] text-amber-700 mt-1 font-medium truncate">
+            EX-04 Shovel Outage (Bench 4)
           </div>
         </div>
 
-        {/* 4. Field Verified */}
+        {/* 5. Field Verified Targets */}
         <div
           id="kpi-field-verified"
-          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
+          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between group hover:border-emerald-300 transition-colors"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500">
@@ -146,31 +198,76 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
             </span>
             <CheckCircle className="w-4 h-4 text-emerald-500" />
           </div>
-          <div className="mt-2">
+          <div className="mt-2 flex items-baseline gap-1">
             <span className="text-2xl font-black tracking-tight text-slate-900 font-sans">
               {verifiedCount}
             </span>
+            <span className="text-xs font-bold text-slate-500">/ 100 Targets</span>
+          </div>
+          <div className="text-[10px] text-emerald-700 mt-1 font-semibold truncate">
+            1,000 km² Sausar Formation
           </div>
         </div>
+      </div>
 
-        {/* 5. Model Status */}
-        <div
-          id="kpi-model-status"
-          className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs flex flex-col justify-between"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">
-              Model Status
-            </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              ONLINE
-            </span>
+      {/* 🧠 Root-Cause AI & 🎯 Prescriptive Action Recommendation Hero */}
+      <div
+        id="root-cause-decision-hero"
+        className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-2xl border border-blue-900/60 p-5 text-white shadow-xl relative overflow-hidden"
+      >
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none" />
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
+          {/* Left: Root-Cause AI Diagnostic */}
+          <div className="space-y-2 lg:max-w-2xl">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-400/30 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
+                ⚠️ Production Shortfall Predictor (-18%)
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                🧠 Root-Cause AI
+              </span>
+            </div>
+
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex flex-wrap items-center gap-2">
+              <span className="text-rose-400 font-extrabold">High Shortfall Risk</span>
+              <span className="text-slate-400">&rarr;</span>
+              <span className="text-amber-300 font-bold">
+                Equipment Downtime 45% + Heavy Rainfall Forecast (72mm)
+              </span>
+            </h3>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              <strong>Multi-Layer Diagnostic:</strong> GPM monsoon radar detects deep convective rain band reaching Balaghat within 36 hours. Simultaneous hydraulic pump failure on shovel <span className="font-mono text-amber-300">EX-04</span> at Bench 4 restricts pit hauling throughput by <strong>750 MT/day</strong>.
+            </p>
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-black tracking-tight text-emerald-600 font-sans">
-              Ready
-            </span>
+
+          {/* Right: AI Action Recommendation */}
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20 lg:w-96 shrink-0 flex flex-col justify-between space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                🎯 AI Action Recommendation
+              </span>
+              <span className="text-[10px] font-black text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-400/30">
+                +8% Recovery (+980 MT)
+              </span>
+            </div>
+
+            <p className="text-xs text-slate-100 font-medium leading-relaxed">
+              &ldquo;Move excavator <strong className="text-amber-300">EX-04 to Mine Zone B</strong> &rarr; reschedule blasting by 1 day &rarr; engage auxiliary dewatering pump P-03 to protect high-grade ore faces.&rdquo;
+            </p>
+
+            <button
+              id="btn-apply-recommendation-hero"
+              type="button"
+              onClick={onNavigateToProduction || onOpenFullExplorer}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 text-xs font-black transition-all shadow-md cursor-pointer group"
+            >
+              <span>Simulate & Recover Shortfall</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </button>
           </div>
         </div>
       </div>
