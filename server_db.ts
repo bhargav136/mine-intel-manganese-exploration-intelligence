@@ -60,7 +60,7 @@ const DB_FILE_PATH = process.env.VERCEL
   ? path.join("/tmp", "server_db.json")
   : path.join(process.cwd(), "server_db.json");
 
-const DEFAULT_DB: DatabaseSchema = {
+export const DEFAULT_DB: DatabaseSchema = {
   version: "1.0.0",
   initializedAt: new Date().toISOString(),
   users: [

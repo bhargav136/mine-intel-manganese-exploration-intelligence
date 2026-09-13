@@ -3,6 +3,21 @@ import path from "path";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { getDb, saveDb, logAction, User } from "./server_db";
+import {
+  getMongoStatus,
+  getUsersAsync,
+  getUserByEmailAsync,
+  addUserAsync,
+  updateUserLoginAsync,
+  getVerifiedTargetsAsync,
+  upsertVerifiedTargetAsync,
+  getShortfallScenariosAsync,
+  addShortfallScenarioAsync,
+  getSettingsAsync,
+  updateSettingsAsync,
+  logActionAsync,
+  getAuditLogsCountAsync,
+} from "./server_mongo";
 
 dotenv.config();
 
@@ -83,22 +98,33 @@ app.get("/api/health", (req, res) => {
 });
 
 // Database status and statistics
-app.get("/api/database/status", (req, res) => {
+app.get("/api/database/status", async (req, res) => {
   try {
-    const db = getDb();
+    const mongoStatus = await getMongoStatus();
+    const settings = await getSettingsAsync();
+    const users = await getUsersAsync();
+    const targets = await getVerifiedTargetsAsync();
+    const scenarios = await getShortfallScenariosAsync();
+    const auditCount = await getAuditLogsCountAsync();
+
     res.json({
       status: "connected",
-      version: db.version,
-      initializedAt: db.initializedAt,
-      usersCount: db.users.length,
-      verifiedTargetsCount: db.verifiedTargets.length,
-      shortfallScenariosCount: db.shortfallScenarios.length,
-      auditLogsCount: db.auditLogs.length,
-      mapProvider: db.mapSettings.mapProvider,
-      hasGoogleMapsKey: !!db.mapSettings.googleMapsApiKey,
-      hasMapboxKey: !!db.mapSettings.mapboxAccessToken,
-      hasGeminiKey: !!db.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
-      storage: "Persistent Local Engine (server_db.json)",
+      storage: mongoStatus.connected
+        ? `MongoDB Atlas (${mongoStatus.dbName})`
+        : mongoStatus.configured
+        ? `MongoDB (Connecting: ${mongoStatus.error || "Retrying"})`
+        : "Persistent Local Engine (server_db.json)",
+      mongo: mongoStatus,
+      version: "1.0.0",
+      initializedAt: new Date().toISOString(),
+      usersCount: users.length,
+      verifiedTargetsCount: targets.length,
+      shortfallScenariosCount: scenarios.length,
+      auditLogsCount: auditCount,
+      mapProvider: settings.mapSettings.mapProvider,
+      hasGoogleMapsKey: !!settings.mapSettings.googleMapsApiKey,
+      hasMapboxKey: !!settings.mapSettings.mapboxAccessToken,
+      hasGeminiKey: !!settings.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
     });
   } catch (error: any) {
     res.status(500).json({ status: "error", message: error?.message });
@@ -106,10 +132,10 @@ app.get("/api/database/status", (req, res) => {
 });
 
 // Authentication: Get available demo profiles
-app.get("/api/auth/users", (req, res) => {
+app.get("/api/auth/users", async (req, res) => {
   try {
-    const db = getDb();
-    const publicUsers = db.users.map(({ passwordHash, ...user }) => user);
+    const users = await getUsersAsync();
+    const publicUsers = users.map(({ passwordHash, ...user }) => user);
     res.json(publicUsers);
   } catch (error: any) {
     res.status(500).json({ error: error?.message });
@@ -117,11 +143,10 @@ app.get("/api/auth/users", (req, res) => {
 });
 
 // Authentication: Login
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const db = getDb();
-    const user = db.users.find((u) => u.email.toLowerCase() === (email || "").trim().toLowerCase());
+    const user = await getUserByEmailAsync(email || "");
 
     if (!user) {
       return res.status(401).json({ error: "User profile not found in MOIL directory." });
@@ -131,11 +156,12 @@ app.post("/api/auth/login", (req, res) => {
       return res.status(401).json({ error: "Invalid password for MOIL security credentials." });
     }
 
-    user.lastLogin = new Date().toISOString();
-    logAction(user.name, "User Login", `Logged in to MINE-INTEL as ${user.role} (${user.department})`);
-    saveDb(db);
+    const lastLogin = new Date().toISOString();
+    await updateUserLoginAsync(user.id, lastLogin);
+    await logActionAsync(user.name, "User Login", `Logged in to MINE-INTEL as ${user.role} (${user.department})`);
 
     const { passwordHash, ...safeUser } = user;
+    safeUser.lastLogin = lastLogin;
     res.json({
       success: true,
       user: safeUser,
@@ -147,19 +173,19 @@ app.post("/api/auth/login", (req, res) => {
 });
 
 // Authentication: Register
-app.post("/api/auth/register", (req, res) => {
+app.post("/api/auth/register", async (req, res) => {
   try {
     const { name, email, password, role, department } = req.body;
     if (!name || !email) {
       return res.status(400).json({ error: "Name and email are required." });
     }
 
-    const db = getDb();
-    const existing = db.users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+    const existing = await getUserByEmailAsync(email);
     if (existing) {
       return res.status(400).json({ error: "Account with this email already exists." });
     }
 
+    const users = await getUsersAsync();
     const newUser: User = {
       id: `usr-${Date.now().toString().slice(-4)}`,
       name: name.trim(),
@@ -167,14 +193,13 @@ app.post("/api/auth/register", (req, res) => {
       passwordHash: password || "password123",
       role: role || "Field Geologist",
       department: department || "Exploration Unit",
-      avatar: `https://images.unsplash.com/photo-${1534528741775 + (db.users.length % 10)}?w=150&auto=format&fit=crop&q=80`,
+      avatar: `https://images.unsplash.com/photo-${1534528741775 + (users.length % 10)}?w=150&auto=format&fit=crop&q=80`,
       createdAt: new Date().toISOString(),
       lastLogin: new Date().toISOString(),
     };
 
-    db.users.push(newUser);
-    logAction(newUser.name, "Account Created", `Registered new ${newUser.role}`);
-    saveDb(db);
+    await addUserAsync(newUser);
+    await logActionAsync(newUser.name, "Account Created", `Registered new ${newUser.role}`);
 
     const { passwordHash, ...safeUser } = newUser;
     res.json({
@@ -188,19 +213,19 @@ app.post("/api/auth/register", (req, res) => {
 });
 
 // Settings: Get Map & API Keys
-app.get("/api/settings", (req, res) => {
+app.get("/api/settings", async (req, res) => {
   try {
-    const db = getDb();
+    const settings = await getSettingsAsync();
     res.json({
-      mapSettings: db.mapSettings,
+      mapSettings: settings.mapSettings,
       apiKeys: {
-        geminiApiKeyMasked: db.apiKeys.geminiApiKey
-          ? `${db.apiKeys.geminiApiKey.slice(0, 4)}...${db.apiKeys.geminiApiKey.slice(-4)}`
+        geminiApiKeyMasked: settings.apiKeys.geminiApiKey
+          ? `${settings.apiKeys.geminiApiKey.slice(0, 4)}...${settings.apiKeys.geminiApiKey.slice(-4)}`
           : "",
-        hasGeminiApiKey: !!db.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
-        preferredModel: db.apiKeys.preferredModel,
-        hasGoogleMapsKey: !!db.mapSettings.googleMapsApiKey,
-        hasMapboxKey: !!db.mapSettings.mapboxAccessToken,
+        hasGeminiApiKey: !!settings.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
+        preferredModel: settings.apiKeys.preferredModel,
+        hasGoogleMapsKey: !!settings.mapSettings.googleMapsApiKey,
+        hasMapboxKey: !!settings.mapSettings.mapboxAccessToken,
       },
     });
   } catch (error: any) {
@@ -209,36 +234,28 @@ app.get("/api/settings", (req, res) => {
 });
 
 // Settings: Update Map & API Keys
-app.post("/api/settings", (req, res) => {
+app.post("/api/settings", async (req, res) => {
   try {
     const { mapSettings, apiKeys } = req.body;
-    const db = getDb();
-
-    if (mapSettings) {
-      db.mapSettings = {
-        ...db.mapSettings,
-        ...mapSettings,
-      };
-    }
-
+    const cleanApiKeys: any = {};
     if (apiKeys) {
       if (typeof apiKeys.geminiApiKey === "string") {
-        db.apiKeys.geminiApiKey = apiKeys.geminiApiKey.trim();
+        cleanApiKeys.geminiApiKey = apiKeys.geminiApiKey.trim();
       }
       if (apiKeys.preferredModel) {
-        db.apiKeys.preferredModel = apiKeys.preferredModel;
+        cleanApiKeys.preferredModel = apiKeys.preferredModel;
       }
     }
 
-    logAction("System", "Settings Updated", `Updated map and API credentials.`);
-    saveDb(db);
+    const updated = await updateSettingsAsync(mapSettings, cleanApiKeys);
+    await logActionAsync("System", "Settings Updated", `Updated map and API credentials.`);
 
     res.json({
       success: true,
       message: "Settings successfully updated in MINE-INTEL database.",
-      mapSettings: db.mapSettings,
-      hasGeminiApiKey: !!db.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
-      preferredModel: db.apiKeys.preferredModel,
+      mapSettings: updated.mapSettings,
+      hasGeminiApiKey: !!updated.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
+      preferredModel: updated.apiKeys.preferredModel,
     });
   } catch (error: any) {
     res.status(500).json({ error: error?.message });
@@ -246,22 +263,20 @@ app.post("/api/settings", (req, res) => {
 });
 
 // Target Verifications: List verified targets
-app.get("/api/targets/verified", (req, res) => {
+app.get("/api/targets/verified", async (req, res) => {
   try {
-    const db = getDb();
-    res.json(db.verifiedTargets);
+    const targets = await getVerifiedTargetsAsync();
+    res.json(targets);
   } catch (error: any) {
     res.status(500).json({ error: error?.message });
   }
 });
 
 // Target Verifications: Save target verification
-app.post("/api/targets/verify", (req, res) => {
+app.post("/api/targets/verify", async (req, res) => {
   try {
     const { targetId, verifiedBy, notes, assayGradeMn, depthMeters } = req.body;
-    const db = getDb();
 
-    const existingIndex = db.verifiedTargets.findIndex((t) => t.targetId === targetId);
     const newRecord = {
       targetId: targetId || "T-UNKNOWN",
       verifiedBy: verifiedBy || "Dr. Alok Sharma",
@@ -272,14 +287,8 @@ app.post("/api/targets/verify", (req, res) => {
       status: "Verified" as const,
     };
 
-    if (existingIndex >= 0) {
-      db.verifiedTargets[existingIndex] = newRecord;
-    } else {
-      db.verifiedTargets.push(newRecord);
-    }
-
-    logAction(verifiedBy || "Geologist", "Target Verified", `Logged assay for Target ${targetId} (${newRecord.assayGradeMn}% Mn)`);
-    saveDb(db);
+    await upsertVerifiedTargetAsync(newRecord);
+    await logActionAsync(verifiedBy || "Geologist", "Target Verified", `Logged assay for Target ${targetId} (${newRecord.assayGradeMn}% Mn)`);
 
     res.json({ success: true, record: newRecord });
   } catch (error: any) {
@@ -288,19 +297,18 @@ app.post("/api/targets/verify", (req, res) => {
 });
 
 // Shortfall Scenarios
-app.get("/api/shortfalls/scenarios", (req, res) => {
+app.get("/api/shortfalls/scenarios", async (req, res) => {
   try {
-    const db = getDb();
-    res.json(db.shortfallScenarios);
+    const scenarios = await getShortfallScenariosAsync();
+    res.json(scenarios);
   } catch (error: any) {
     res.status(500).json({ error: error?.message });
   }
 });
 
-app.post("/api/shortfalls/scenarios", (req, res) => {
+app.post("/api/shortfalls/scenarios", async (req, res) => {
   try {
     const { name, projectedShortfallMT, recoveredTonnageMT, appliedInterventions, author } = req.body;
-    const db = getDb();
 
     const scenario = {
       id: `SCEN-${Date.now().toString().slice(-4)}`,
@@ -312,9 +320,8 @@ app.post("/api/shortfalls/scenarios", (req, res) => {
       author: author || "Mine Planning Superintendent",
     };
 
-    db.shortfallScenarios.unshift(scenario);
-    logAction(author || "Mine Planner", "Shortfall Scenario Saved", `Saved ${scenario.name} recovering ${scenario.recoveredTonnageMT} MT`);
-    saveDb(db);
+    await addShortfallScenarioAsync(scenario);
+    await logActionAsync(author || "Mine Planner", "Shortfall Scenario Saved", `Saved ${scenario.name} recovering ${scenario.recoveredTonnageMT} MT`);
 
     res.json({ success: true, scenario });
   } catch (error: any) {

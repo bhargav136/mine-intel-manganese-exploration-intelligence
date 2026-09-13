@@ -148,19 +148,333 @@ function saveDb(db) {
     console.error("Failed to write to database file:", err);
   }
 }
-function logAction(user, action, details) {
-  const db = getDb();
-  db.auditLogs.unshift({
+
+// server_mongo.ts
+import { MongoClient } from "mongodb";
+var cachedClient = null;
+var cachedDb = null;
+var isSeeded = false;
+function isMongoConfigured() {
+  return !!process.env.MONGODB_URI && process.env.MONGODB_URI.trim().length > 0;
+}
+async function getMongoDb() {
+  const uri = process.env.MONGODB_URI?.trim();
+  if (!uri) {
+    return null;
+  }
+  if (cachedDb && cachedClient) {
+    return cachedDb;
+  }
+  try {
+    const dbName = process.env.MONGODB_DB_NAME || "mine_intel";
+    const client = new MongoClient(uri, {
+      serverSelectionTimeoutMS: 5e3,
+      connectTimeoutMS: 5e3,
+      socketTimeoutMS: 1e4
+    });
+    await client.connect();
+    const db = client.db(dbName);
+    cachedClient = client;
+    cachedDb = db;
+    if (!isSeeded) {
+      await seedMongoIfEmpty(db);
+      isSeeded = true;
+    }
+    return db;
+  } catch (error) {
+    console.error("MongoDB connection error:", error?.message || error);
+    return null;
+  }
+}
+async function getMongoStatus() {
+  const configured = isMongoConfigured();
+  if (!configured) {
+    return {
+      connected: false,
+      configured: false,
+      dbName: "none (using local engine)"
+    };
+  }
+  try {
+    const db = await getMongoDb();
+    if (db) {
+      await db.command({ ping: 1 });
+      const uri = process.env.MONGODB_URI || "";
+      const hostMatch = uri.match(/@([^/?]+)/);
+      const clusterHost = hostMatch ? hostMatch[1] : "mongodb-cluster";
+      return {
+        connected: true,
+        configured: true,
+        dbName: db.databaseName,
+        clusterHost
+      };
+    }
+  } catch (err) {
+    return {
+      connected: false,
+      configured: true,
+      dbName: process.env.MONGODB_DB_NAME || "mine_intel",
+      error: err?.message
+    };
+  }
+  return {
+    connected: false,
+    configured: true,
+    dbName: process.env.MONGODB_DB_NAME || "mine_intel",
+    error: "Connection timeout or cluster unreachable"
+  };
+}
+async function seedMongoIfEmpty(db) {
+  try {
+    const usersCol = db.collection("users");
+    const userCount = await usersCol.countDocuments();
+    if (userCount === 0 && DEFAULT_DB.users.length > 0) {
+      await usersCol.insertMany(DEFAULT_DB.users.map((u) => ({ ...u })));
+    }
+    const targetsCol = db.collection("verified_targets");
+    const targetsCount = await targetsCol.countDocuments();
+    if (targetsCount === 0 && DEFAULT_DB.verifiedTargets.length > 0) {
+      await targetsCol.insertMany(DEFAULT_DB.verifiedTargets.map((t) => ({ ...t })));
+    }
+    const settingsCol = db.collection("settings");
+    const settingsDoc = await settingsCol.findOne({ _id: "global_settings" });
+    if (!settingsDoc) {
+      await settingsCol.insertOne({
+        _id: "global_settings",
+        mapSettings: DEFAULT_DB.mapSettings,
+        apiKeys: DEFAULT_DB.apiKeys,
+        updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+      });
+    }
+    const shortfallsCol = db.collection("shortfall_scenarios");
+    const scenariosCount = await shortfallsCol.countDocuments();
+    if (scenariosCount === 0 && DEFAULT_DB.shortfallScenarios.length > 0) {
+      await shortfallsCol.insertMany(DEFAULT_DB.shortfallScenarios.map((s) => ({ ...s })));
+    }
+    const auditCol = db.collection("audit_logs");
+    const auditCount = await auditCol.countDocuments();
+    if (auditCount === 0 && DEFAULT_DB.auditLogs.length > 0) {
+      await auditCol.insertMany(DEFAULT_DB.auditLogs.map((a) => ({ ...a })));
+    }
+  } catch (err) {
+    console.error("Error during MongoDB seeding:", err);
+  }
+}
+async function getUsersAsync() {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      const users = await db.collection("users").find({}).toArray();
+      return users.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        passwordHash: u.passwordHash,
+        role: u.role,
+        department: u.department,
+        avatar: u.avatar,
+        createdAt: u.createdAt,
+        lastLogin: u.lastLogin
+      }));
+    } catch (e) {
+      console.error("MongoDB getUsers error, using local fallback:", e);
+    }
+  }
+  return getDb().users;
+}
+async function getUserByEmailAsync(email) {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      const user = await db.collection("users").findOne({ email: { $regex: new RegExp(`^${email.trim()}$`, "i") } });
+      if (user) {
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          passwordHash: user.passwordHash,
+          role: user.role,
+          department: user.department,
+          avatar: user.avatar,
+          createdAt: user.createdAt,
+          lastLogin: user.lastLogin
+        };
+      }
+      return null;
+    } catch (e) {
+      console.error("MongoDB getUserByEmail error, using local fallback:", e);
+    }
+  }
+  const localUser = getDb().users.find(
+    (u) => u.email.toLowerCase() === email.trim().toLowerCase()
+  );
+  return localUser || null;
+}
+async function addUserAsync(user) {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      await db.collection("users").insertOne({ ...user });
+    } catch (e) {
+      console.error("MongoDB addUser error, falling back to local:", e);
+    }
+  }
+  const local = getDb();
+  local.users.push(user);
+  saveDb(local);
+}
+async function updateUserLoginAsync(userId, lastLogin) {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      await db.collection("users").updateOne({ id: userId }, { $set: { lastLogin } });
+    } catch (e) {
+      console.error("MongoDB updateUserLogin error:", e);
+    }
+  }
+  const local = getDb();
+  const u = local.users.find((x) => x.id === userId);
+  if (u) {
+    u.lastLogin = lastLogin;
+    saveDb(local);
+  }
+}
+async function getVerifiedTargetsAsync() {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      const targets = await db.collection("verified_targets").find({}).toArray();
+      return targets.map(({ _id, ...rest }) => rest);
+    } catch (e) {
+      console.error("MongoDB getVerifiedTargets error:", e);
+    }
+  }
+  return getDb().verifiedTargets;
+}
+async function upsertVerifiedTargetAsync(record) {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      await db.collection("verified_targets").updateOne({ targetId: record.targetId }, { $set: record }, { upsert: true });
+    } catch (e) {
+      console.error("MongoDB upsertVerifiedTarget error:", e);
+    }
+  }
+  const local = getDb();
+  const idx = local.verifiedTargets.findIndex((t) => t.targetId === record.targetId);
+  if (idx >= 0) {
+    local.verifiedTargets[idx] = record;
+  } else {
+    local.verifiedTargets.push(record);
+  }
+  saveDb(local);
+}
+async function getShortfallScenariosAsync() {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      const scenarios = await db.collection("shortfall_scenarios").find({}).sort({ timestamp: -1 }).toArray();
+      return scenarios.map(({ _id, ...rest }) => rest);
+    } catch (e) {
+      console.error("MongoDB getShortfallScenarios error:", e);
+    }
+  }
+  return getDb().shortfallScenarios;
+}
+async function addShortfallScenarioAsync(scenario) {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      await db.collection("shortfall_scenarios").insertOne({ ...scenario });
+    } catch (e) {
+      console.error("MongoDB addShortfallScenario error:", e);
+    }
+  }
+  const local = getDb();
+  local.shortfallScenarios.unshift(scenario);
+  saveDb(local);
+}
+async function getSettingsAsync() {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      const doc = await db.collection("settings").findOne({ _id: "global_settings" });
+      if (doc) {
+        return {
+          mapSettings: doc.mapSettings || DEFAULT_DB.mapSettings,
+          apiKeys: doc.apiKeys || DEFAULT_DB.apiKeys
+        };
+      }
+    } catch (e) {
+      console.error("MongoDB getSettings error:", e);
+    }
+  }
+  const local = getDb();
+  return {
+    mapSettings: local.mapSettings,
+    apiKeys: local.apiKeys
+  };
+}
+async function updateSettingsAsync(mapSettings, apiKeys) {
+  const current = await getSettingsAsync();
+  const newMapSettings = mapSettings ? { ...current.mapSettings, ...mapSettings } : current.mapSettings;
+  const newApiKeys = apiKeys ? { ...current.apiKeys, ...apiKeys } : current.apiKeys;
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      await db.collection("settings").updateOne(
+        { _id: "global_settings" },
+        {
+          $set: {
+            mapSettings: newMapSettings,
+            apiKeys: newApiKeys,
+            updatedAt: (/* @__PURE__ */ new Date()).toISOString()
+          }
+        },
+        { upsert: true }
+      );
+    } catch (e) {
+      console.error("MongoDB updateSettings error:", e);
+    }
+  }
+  const local = getDb();
+  local.mapSettings = newMapSettings;
+  local.apiKeys = newApiKeys;
+  saveDb(local);
+  return { mapSettings: newMapSettings, apiKeys: newApiKeys };
+}
+async function logActionAsync(user, action, details) {
+  const log = {
     id: `LOG-${Date.now()}`,
     timestamp: (/* @__PURE__ */ new Date()).toISOString(),
     user,
     action,
     details
-  });
-  if (db.auditLogs.length > 100) {
-    db.auditLogs = db.auditLogs.slice(0, 100);
+  };
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      await db.collection("audit_logs").insertOne({ ...log });
+    } catch (e) {
+      console.error("MongoDB logAction error:", e);
+    }
   }
-  saveDb(db);
+  const local = getDb();
+  local.auditLogs.unshift(log);
+  if (local.auditLogs.length > 100) {
+    local.auditLogs = local.auditLogs.slice(0, 100);
+  }
+  saveDb(local);
+}
+async function getAuditLogsCountAsync() {
+  const db = await getMongoDb();
+  if (db) {
+    try {
+      return await db.collection("audit_logs").countDocuments();
+    } catch (e) {
+    }
+  }
+  return getDb().auditLogs.length;
 }
 
 // server.ts
@@ -223,51 +537,57 @@ app.get("/api/health", (req, res) => {
     region: "Balaghat, Madhya Pradesh"
   });
 });
-app.get("/api/database/status", (req, res) => {
+app.get("/api/database/status", async (req, res) => {
   try {
-    const db = getDb();
+    const mongoStatus = await getMongoStatus();
+    const settings = await getSettingsAsync();
+    const users = await getUsersAsync();
+    const targets = await getVerifiedTargetsAsync();
+    const scenarios = await getShortfallScenariosAsync();
+    const auditCount = await getAuditLogsCountAsync();
     res.json({
       status: "connected",
-      version: db.version,
-      initializedAt: db.initializedAt,
-      usersCount: db.users.length,
-      verifiedTargetsCount: db.verifiedTargets.length,
-      shortfallScenariosCount: db.shortfallScenarios.length,
-      auditLogsCount: db.auditLogs.length,
-      mapProvider: db.mapSettings.mapProvider,
-      hasGoogleMapsKey: !!db.mapSettings.googleMapsApiKey,
-      hasMapboxKey: !!db.mapSettings.mapboxAccessToken,
-      hasGeminiKey: !!db.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
-      storage: "Persistent Local Engine (server_db.json)"
+      storage: mongoStatus.connected ? `MongoDB Atlas (${mongoStatus.dbName})` : mongoStatus.configured ? `MongoDB (Connecting: ${mongoStatus.error || "Retrying"})` : "Persistent Local Engine (server_db.json)",
+      mongo: mongoStatus,
+      version: "1.0.0",
+      initializedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      usersCount: users.length,
+      verifiedTargetsCount: targets.length,
+      shortfallScenariosCount: scenarios.length,
+      auditLogsCount: auditCount,
+      mapProvider: settings.mapSettings.mapProvider,
+      hasGoogleMapsKey: !!settings.mapSettings.googleMapsApiKey,
+      hasMapboxKey: !!settings.mapSettings.mapboxAccessToken,
+      hasGeminiKey: !!settings.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY
     });
   } catch (error) {
     res.status(500).json({ status: "error", message: error?.message });
   }
 });
-app.get("/api/auth/users", (req, res) => {
+app.get("/api/auth/users", async (req, res) => {
   try {
-    const db = getDb();
-    const publicUsers = db.users.map(({ passwordHash, ...user }) => user);
+    const users = await getUsersAsync();
+    const publicUsers = users.map(({ passwordHash, ...user }) => user);
     res.json(publicUsers);
   } catch (error) {
     res.status(500).json({ error: error?.message });
   }
 });
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const db = getDb();
-    const user = db.users.find((u) => u.email.toLowerCase() === (email || "").trim().toLowerCase());
+    const user = await getUserByEmailAsync(email || "");
     if (!user) {
       return res.status(401).json({ error: "User profile not found in MOIL directory." });
     }
     if (user.passwordHash !== password && password !== "password123") {
       return res.status(401).json({ error: "Invalid password for MOIL security credentials." });
     }
-    user.lastLogin = (/* @__PURE__ */ new Date()).toISOString();
-    logAction(user.name, "User Login", `Logged in to MINE-INTEL as ${user.role} (${user.department})`);
-    saveDb(db);
+    const lastLogin = (/* @__PURE__ */ new Date()).toISOString();
+    await updateUserLoginAsync(user.id, lastLogin);
+    await logActionAsync(user.name, "User Login", `Logged in to MINE-INTEL as ${user.role} (${user.department})`);
     const { passwordHash, ...safeUser } = user;
+    safeUser.lastLogin = lastLogin;
     res.json({
       success: true,
       user: safeUser,
@@ -277,17 +597,17 @@ app.post("/api/auth/login", (req, res) => {
     res.status(500).json({ error: error?.message });
   }
 });
-app.post("/api/auth/register", (req, res) => {
+app.post("/api/auth/register", async (req, res) => {
   try {
     const { name, email, password, role, department } = req.body;
     if (!name || !email) {
       return res.status(400).json({ error: "Name and email are required." });
     }
-    const db = getDb();
-    const existing = db.users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+    const existing = await getUserByEmailAsync(email);
     if (existing) {
       return res.status(400).json({ error: "Account with this email already exists." });
     }
+    const users = await getUsersAsync();
     const newUser = {
       id: `usr-${Date.now().toString().slice(-4)}`,
       name: name.trim(),
@@ -295,13 +615,12 @@ app.post("/api/auth/register", (req, res) => {
       passwordHash: password || "password123",
       role: role || "Field Geologist",
       department: department || "Exploration Unit",
-      avatar: `https://images.unsplash.com/photo-${1534528741775 + db.users.length % 10}?w=150&auto=format&fit=crop&q=80`,
+      avatar: `https://images.unsplash.com/photo-${1534528741775 + users.length % 10}?w=150&auto=format&fit=crop&q=80`,
       createdAt: (/* @__PURE__ */ new Date()).toISOString(),
       lastLogin: (/* @__PURE__ */ new Date()).toISOString()
     };
-    db.users.push(newUser);
-    logAction(newUser.name, "Account Created", `Registered new ${newUser.role}`);
-    saveDb(db);
+    await addUserAsync(newUser);
+    await logActionAsync(newUser.name, "Account Created", `Registered new ${newUser.role}`);
     const { passwordHash, ...safeUser } = newUser;
     res.json({
       success: true,
@@ -312,67 +631,59 @@ app.post("/api/auth/register", (req, res) => {
     res.status(500).json({ error: error?.message });
   }
 });
-app.get("/api/settings", (req, res) => {
+app.get("/api/settings", async (req, res) => {
   try {
-    const db = getDb();
+    const settings = await getSettingsAsync();
     res.json({
-      mapSettings: db.mapSettings,
+      mapSettings: settings.mapSettings,
       apiKeys: {
-        geminiApiKeyMasked: db.apiKeys.geminiApiKey ? `${db.apiKeys.geminiApiKey.slice(0, 4)}...${db.apiKeys.geminiApiKey.slice(-4)}` : "",
-        hasGeminiApiKey: !!db.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
-        preferredModel: db.apiKeys.preferredModel,
-        hasGoogleMapsKey: !!db.mapSettings.googleMapsApiKey,
-        hasMapboxKey: !!db.mapSettings.mapboxAccessToken
+        geminiApiKeyMasked: settings.apiKeys.geminiApiKey ? `${settings.apiKeys.geminiApiKey.slice(0, 4)}...${settings.apiKeys.geminiApiKey.slice(-4)}` : "",
+        hasGeminiApiKey: !!settings.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
+        preferredModel: settings.apiKeys.preferredModel,
+        hasGoogleMapsKey: !!settings.mapSettings.googleMapsApiKey,
+        hasMapboxKey: !!settings.mapSettings.mapboxAccessToken
       }
     });
   } catch (error) {
     res.status(500).json({ error: error?.message });
   }
 });
-app.post("/api/settings", (req, res) => {
+app.post("/api/settings", async (req, res) => {
   try {
     const { mapSettings, apiKeys } = req.body;
-    const db = getDb();
-    if (mapSettings) {
-      db.mapSettings = {
-        ...db.mapSettings,
-        ...mapSettings
-      };
-    }
+    const cleanApiKeys = {};
     if (apiKeys) {
       if (typeof apiKeys.geminiApiKey === "string") {
-        db.apiKeys.geminiApiKey = apiKeys.geminiApiKey.trim();
+        cleanApiKeys.geminiApiKey = apiKeys.geminiApiKey.trim();
       }
       if (apiKeys.preferredModel) {
-        db.apiKeys.preferredModel = apiKeys.preferredModel;
+        cleanApiKeys.preferredModel = apiKeys.preferredModel;
       }
     }
-    logAction("System", "Settings Updated", `Updated map and API credentials.`);
-    saveDb(db);
+    const updated = await updateSettingsAsync(mapSettings, cleanApiKeys);
+    await logActionAsync("System", "Settings Updated", `Updated map and API credentials.`);
     res.json({
       success: true,
       message: "Settings successfully updated in MINE-INTEL database.",
-      mapSettings: db.mapSettings,
-      hasGeminiApiKey: !!db.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
-      preferredModel: db.apiKeys.preferredModel
+      mapSettings: updated.mapSettings,
+      hasGeminiApiKey: !!updated.apiKeys.geminiApiKey || !!process.env.GEMINI_API_KEY,
+      preferredModel: updated.apiKeys.preferredModel
     });
   } catch (error) {
     res.status(500).json({ error: error?.message });
   }
 });
-app.get("/api/targets/verified", (req, res) => {
+app.get("/api/targets/verified", async (req, res) => {
   try {
-    const db = getDb();
-    res.json(db.verifiedTargets);
+    const targets = await getVerifiedTargetsAsync();
+    res.json(targets);
   } catch (error) {
     res.status(500).json({ error: error?.message });
   }
 });
-app.post("/api/targets/verify", (req, res) => {
+app.post("/api/targets/verify", async (req, res) => {
   try {
     const { targetId, verifiedBy, notes, assayGradeMn, depthMeters } = req.body;
-    const db = getDb();
-    const existingIndex = db.verifiedTargets.findIndex((t) => t.targetId === targetId);
     const newRecord = {
       targetId: targetId || "T-UNKNOWN",
       verifiedBy: verifiedBy || "Dr. Alok Sharma",
@@ -382,30 +693,24 @@ app.post("/api/targets/verify", (req, res) => {
       depthMeters: Number(depthMeters) || 30,
       status: "Verified"
     };
-    if (existingIndex >= 0) {
-      db.verifiedTargets[existingIndex] = newRecord;
-    } else {
-      db.verifiedTargets.push(newRecord);
-    }
-    logAction(verifiedBy || "Geologist", "Target Verified", `Logged assay for Target ${targetId} (${newRecord.assayGradeMn}% Mn)`);
-    saveDb(db);
+    await upsertVerifiedTargetAsync(newRecord);
+    await logActionAsync(verifiedBy || "Geologist", "Target Verified", `Logged assay for Target ${targetId} (${newRecord.assayGradeMn}% Mn)`);
     res.json({ success: true, record: newRecord });
   } catch (error) {
     res.status(500).json({ error: error?.message });
   }
 });
-app.get("/api/shortfalls/scenarios", (req, res) => {
+app.get("/api/shortfalls/scenarios", async (req, res) => {
   try {
-    const db = getDb();
-    res.json(db.shortfallScenarios);
+    const scenarios = await getShortfallScenariosAsync();
+    res.json(scenarios);
   } catch (error) {
     res.status(500).json({ error: error?.message });
   }
 });
-app.post("/api/shortfalls/scenarios", (req, res) => {
+app.post("/api/shortfalls/scenarios", async (req, res) => {
   try {
     const { name, projectedShortfallMT, recoveredTonnageMT, appliedInterventions, author } = req.body;
-    const db = getDb();
     const scenario = {
       id: `SCEN-${Date.now().toString().slice(-4)}`,
       name: name || "Optimized Recovery Scenario",
@@ -415,9 +720,8 @@ app.post("/api/shortfalls/scenarios", (req, res) => {
       appliedInterventions: appliedInterventions || [],
       author: author || "Mine Planning Superintendent"
     };
-    db.shortfallScenarios.unshift(scenario);
-    logAction(author || "Mine Planner", "Shortfall Scenario Saved", `Saved ${scenario.name} recovering ${scenario.recoveredTonnageMT} MT`);
-    saveDb(db);
+    await addShortfallScenarioAsync(scenario);
+    await logActionAsync(author || "Mine Planner", "Shortfall Scenario Saved", `Saved ${scenario.name} recovering ${scenario.recoveredTonnageMT} MT`);
     res.json({ success: true, scenario });
   } catch (error) {
     res.status(500).json({ error: error?.message });
