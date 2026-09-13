@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import {
   Layers,
@@ -102,6 +103,11 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
     layerGroupRef.current = layerGroup;
     zonesLayerRef.current = zonesGroup;
     mapInstanceRef.current = map;
+
+    // Force map to recalculate its container size after React renders
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
 
     return () => {
       map.remove();
@@ -406,7 +412,7 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
       <div className="flex-1 flex flex-col lg:flex-row min-h-0 relative">
         {/* Leaflet Map Canvas */}
         <div className="flex-1 h-full min-h-[420px] relative z-10">
-          <div ref={mapContainerRef} className="w-full h-full" />
+          <div ref={mapContainerRef} className="w-full h-full" style={{ minHeight: '420px' }} />
 
           {/* Floating Search & Filter Bar on Map */}
           <div className="absolute top-3 right-3 z-[1000] bg-white/95 backdrop-blur rounded-xl border border-slate-200 p-2 shadow-lg flex items-center gap-2 max-w-sm">
