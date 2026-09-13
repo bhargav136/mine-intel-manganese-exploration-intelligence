@@ -15,7 +15,6 @@ import { TargetDetailModal } from './components/TargetDetailModal';
 import { ApiKeyModal } from './components/ApiKeyModal';
 import { PreviousAnalysesModal } from './components/PreviousAnalysesModal';
 import { LoginPage } from './components/LoginPage';
-import { LandingPage } from './components/LandingPage';
 import { DatabaseModal } from './components/DatabaseModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -241,34 +240,20 @@ function DashboardView() {
 
 function MainApp() {
   const { user, isLoading } = useAuth();
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [loginInitialTab, setLoginInitialTab] = useState<'signin' | 'signup'>('signin');
-
-  const openLogin = () => { setLoginInitialTab('signin'); setLoginModalOpen(true); };
-  const openRegister = () => { setLoginInitialTab('signup'); setLoginModalOpen(true); };
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen bg-white flex items-center justify-center">
+      <div className="h-screen w-screen bg-[#F8FAFC] flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-          <span className="text-xs text-slate-500 font-medium">Loading MINE-INTEL...</span>
+          <span className="text-xs text-slate-500 font-medium">Loading MOIL MINE-INTEL...</span>
         </div>
       </div>
     );
   }
 
   if (!user) {
-    return (
-      <>
-        <LandingPage onOpenLogin={openLogin} onOpenRegister={openRegister} />
-        <LoginPage
-          isOpen={loginModalOpen}
-          onClose={() => setLoginModalOpen(false)}
-          initialTab={loginInitialTab}
-        />
-      </>
-    );
+    return <LoginPage isOpen={true} isFullPage={true} />;
   }
 
   return <DashboardView />;

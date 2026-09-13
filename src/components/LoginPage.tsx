@@ -148,7 +148,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
             : "bg-white rounded-2xl max-w-4xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
         }
       >
-        {/* Left Side: MOIL / SIH Brand Panel */}
+        {/* Left Side: MOIL Brand Panel */}
         <div className="md:w-5/12 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
           {/* Subtle grid watermark */}
           <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] opacity-15 pointer-events-none" />
