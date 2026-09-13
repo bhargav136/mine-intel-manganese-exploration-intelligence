@@ -28,6 +28,7 @@ import {
   BOREHOLE_ASSAYS,
 } from './data/mockData';
 import { ProjectOverviewView } from './components/ProjectOverviewView';
+import { SourceCodeView } from './components/SourceCodeView';
 import { NavigationTab, ExplorationTarget } from './types';
 
 function DashboardView() {
@@ -185,6 +186,8 @@ function DashboardView() {
           {activeTab === 'reports-impact' && <ReportsImpactView />}
 
           {activeTab === 'data-health' && <DataHealthView />}
+
+          {activeTab === 'source-code' && <SourceCodeView />}
         </main>
       </div>
 
@@ -241,7 +244,7 @@ function DashboardView() {
 
 function MainApp() {
   const { user, isLoading } = useAuth();
-  const [currentView, setCurrentView] = useState<'home' | 'login' | 'register'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'register'>('login');
 
   if (isLoading) {
     return (
@@ -259,46 +262,23 @@ function MainApp() {
     return <DashboardView />;
   }
 
-  // If user clicked Login
-  if (currentView === 'login') {
+  // Public Landing Page
+  if (currentView === 'home') {
     return (
-      <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
-        <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
-          <button
-            onClick={() => setCurrentView('home')}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
-              M
-            </div>
-            <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
-          </button>
-          <button
-            onClick={() => setCurrentView('home')}
-            className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-          >
-            &larr; Back to Home
-          </button>
-        </header>
-        <main className="flex-1 flex items-center justify-center p-4">
-          <LoginPage
-            isOpen={true}
-            isFullPage={true}
-            initialTab="signin"
-            onClose={() => setCurrentView('home')}
-          />
-        </main>
-      </div>
+      <LandingPage
+        onOpenLogin={() => setCurrentView('login')}
+        onOpenRegister={() => setCurrentView('register')}
+      />
     );
   }
 
-  // If user clicked Register
+  // If user clicked Register — full-page register form with back link
   if (currentView === 'register') {
     return (
       <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
         <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
           <button
-            onClick={() => setCurrentView('home')}
+            onClick={() => setCurrentView('login')}
             className="flex items-center gap-2 cursor-pointer"
           >
             <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
@@ -307,10 +287,10 @@ function MainApp() {
             <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
           </button>
           <button
-            onClick={() => setCurrentView('home')}
+            onClick={() => setCurrentView('login')}
             className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
           >
-            &larr; Back to Home
+            &larr; Back to Login
           </button>
         </header>
         <main className="flex-1 flex items-center justify-center p-4">
@@ -318,19 +298,44 @@ function MainApp() {
             isOpen={true}
             isFullPage={true}
             initialTab="signup"
-            onClose={() => setCurrentView('home')}
+            onClose={() => setCurrentView('login')}
+            onViewLanding={() => setCurrentView('home')}
           />
         </main>
       </div>
     );
   }
 
-  // Default: Public Landing Page matching digital-assets-management.onrender.com
+  // Default: Login Page (matches sample site's behaviour — opens login on initial visit)
   return (
-    <LandingPage
-      onOpenLogin={() => setCurrentView('login')}
-      onOpenRegister={() => setCurrentView('register')}
-    />
+    <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
+        <button
+          onClick={() => setCurrentView('home')}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
+            M
+          </div>
+          <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
+        </button>
+        <button
+          onClick={() => setCurrentView('home')}
+          className="text-xs font-semibold text-slate-500 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
+        >
+          View Public Showcase &rarr;
+        </button>
+      </header>
+      <main className="flex-1 flex items-center justify-center p-4">
+        <LoginPage
+          isOpen={true}
+          isFullPage={true}
+          initialTab="signin"
+          onClose={() => setCurrentView('home')}
+          onViewLanding={() => setCurrentView('home')}
+        />
+      </main>
+    </div>
   );
 }
 

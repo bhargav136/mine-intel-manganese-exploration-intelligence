@@ -7,7 +7,8 @@ export type NavigationTab =
   | 'production-intelligence'
   | 'corrective-actions'
   | 'reports-impact'
-  | 'data-health';
+  | 'data-health'
+  | 'source-code';
 
 export interface TargetCluster {
   id: string;

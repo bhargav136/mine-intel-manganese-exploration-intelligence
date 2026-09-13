@@ -13,6 +13,7 @@ import {
   User,
   ShieldCheck,
   BookOpen,
+  Code,
 } from 'lucide-react';
 import { NavigationTab } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -89,6 +90,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: <Database className="w-4 h-4" />,
       badge: 'Active Feeds',
       badgeColor: 'bg-slate-100 text-slate-700 font-bold',
+    },
+    {
+      id: 'source-code',
+      label: 'Source Code & Download',
+      icon: <Code className="w-4 h-4" />,
+      badge: 'Frontend & Backend',
+      badgeColor: 'bg-blue-100 text-blue-800 font-bold',
     },
   ];
 

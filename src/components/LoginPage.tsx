@@ -21,6 +21,8 @@ interface LoginPageProps {
   onClose?: () => void;
   isFullPage?: boolean;
   initialTab?: 'signin' | 'signup';
+  onSuccess?: () => void;
+  onViewLanding?: () => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
@@ -28,6 +30,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
   onClose,
   isFullPage = false,
   initialTab = 'signin',
+  onSuccess,
+  onViewLanding,
 }) => {
   const { user, login, register, switchUser } = useAuth();
   const [activeTab, setActiveTab] = useState<'signin' | 'signup'>(initialTab);
@@ -101,8 +105,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         const res = await login(email, password);
         if (!res.success) {
           setError(res.error || 'Authentication failed. Verify credentials.');
-        } else if (onClose) {
-          onClose();
+        } else {
+          if (onSuccess) onSuccess();
+          if (onClose) onClose();
         }
       } else {
         if (!name || !email) {
@@ -113,8 +118,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         const res = await register({ name, email, role, department, password });
         if (!res.success) {
           setError(res.error || 'Registration failed.');
-        } else if (onClose) {
-          onClose();
+        } else {
+          if (onSuccess) onSuccess();
+          if (onClose) onClose();
         }
       }
     } finally {
@@ -126,6 +132,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setEmail(profile.email);
     setPassword('password123');
     switchUser(profile);
+    if (onSuccess) onSuccess();
     if (onClose) onClose();
   };
 
@@ -251,7 +258,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         <div className="md:w-7/12 p-6 sm:p-8 flex flex-col justify-between overflow-y-auto bg-slate-50/50">
           <div>
             {/* Header & Close */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">
                   {activeTab === 'signin' ? 'Sign in to Security Portal' : 'Register Exploration Officer'}
@@ -269,6 +276,50 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </button>
               )}
             </div>
+
+            {/* Link to Public Showcase */}
+            {onViewLanding && (
+              <div className="mb-3 flex items-center justify-between pb-2.5 border-b border-slate-200">
+                <button
+                  type="button"
+                  onClick={onViewLanding}
+                  className="cursor-pointer text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 hover:underline"
+                >
+                  <span>&larr; View Public Project Showcase & Landing Page</span>
+                </button>
+              </div>
+            )}
+
+            {/* If already authenticated, show instant Enter Dashboard option */}
+            {user && (
+              <div className="mb-4 p-3.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src={user.avatar}
+                    className="w-8 h-8 rounded-full border border-blue-300 object-cover"
+                    alt={user.name}
+                  />
+                  <div>
+                    <div className="text-xs font-bold text-slate-900">
+                      Active Session: {user.name}
+                    </div>
+                    <div className="text-[10px] text-slate-600">
+                      {user.role}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onSuccess) onSuccess();
+                    if (onClose) onClose();
+                  }}
+                  className="cursor-pointer px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs flex items-center gap-1"
+                >
+                  <span>Enter Dashboard &rarr;</span>
+                </button>
+              </div>
+            )}
 
             {/* Quick 1-Click Persona Login */}
             <div className="mb-5 bg-white rounded-xl border border-slate-200 p-3 shadow-2xs">
