@@ -28,8 +28,8 @@ import {
 } from './data/mockData';
 import { NavigationTab, ExplorationTarget } from './types';
 
-function MainApp() {
-  const { user, isLoginModalOpen, openLoginModal, closeLoginModal, isLoading } = useAuth();
+function DashboardView() {
+  const { user, isLoginModalOpen, openLoginModal, closeLoginModal } = useAuth();
   const [activeTab, setActiveTab] = useState<NavigationTab>('command-center');
   const [targets, setTargets] = useState<ExplorationTarget[]>(TOP_PRIORITY_TARGETS);
   const [verifiedCount, setVerifiedCount] = useState<number>(60);
@@ -40,22 +40,6 @@ function MainApp() {
   const [isDatabaseModalOpen, setIsDatabaseModalOpen] = useState(false);
   const [inspectingTarget, setInspectingTarget] = useState<ExplorationTarget | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string>('Balaghat, Madhya Pradesh');
-
-  // If not logged in, render the full Login & Registration page
-  if (isLoading) {
-    return (
-      <div className="h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400"></div>
-          <span className="text-xs text-slate-400 font-medium">Authenticating MINE-INTEL Portal...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <LoginPage isOpen={true} isFullPage={true} />;
-  }
 
   // Sync with central database on mount
   useEffect(() => {
@@ -246,6 +230,27 @@ function MainApp() {
       <AiAssistantModal onOpenApiKeyModal={() => handleOpenApiKey('gemini')} />
     </div>
   );
+}
+
+function MainApp() {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-400"></div>
+          <span className="text-xs text-slate-400 font-medium">Authenticating MINE-INTEL Portal...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage isOpen={true} isFullPage={true} />;
+  }
+
+  return <DashboardView />;
 }
 
 export default function App() {
