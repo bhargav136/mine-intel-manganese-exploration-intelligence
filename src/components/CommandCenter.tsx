@@ -33,6 +33,7 @@ interface CommandCenterProps {
   onVerifyTarget: (targetId: string) => void;
   onOpenApiKeyModal?: (tab?: 'gemini' | 'map') => void;
   onNavigateToProduction?: () => void;
+  selectedRegion?: string;
 }
 
 export const CommandCenter: React.FC<CommandCenterProps> = ({
@@ -44,6 +45,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
   onVerifyTarget,
   onOpenApiKeyModal,
   onNavigateToProduction,
+  selectedRegion = 'Balaghat, Madhya Pradesh',
 }) => {
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -313,6 +315,7 @@ export const CommandCenter: React.FC<CommandCenterProps> = ({
           <LeafletReserveMap
             selectedTarget={selectedTarget}
             onSelectTarget={handleSelectTarget}
+            selectedRegion={selectedRegion}
           />
 
           {/* Bottom Table of Top Targets under Big Map */}

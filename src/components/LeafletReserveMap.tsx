@@ -21,29 +21,330 @@ import { TOP_PRIORITY_TARGETS, MOIL_MINE_SITES } from '../data/mockData';
 interface LeafletReserveMapProps {
   onSelectTarget?: (target: ExplorationTarget) => void;
   selectedTarget?: ExplorationTarget | null;
+  selectedRegion?: string;
 }
+
+const SECTOR_CONFIGS: Record<string, {
+  name: string;
+  center: [number, number];
+  zoom: number;
+  area: string;
+  boundary: [number, number][];
+  zones: { name: string; center: [number, number]; radius: number; color: string; desc: string }[];
+  targets: ExplorationTarget[];
+}> = {
+  balaghat: {
+    name: 'Balaghat District, MP',
+    center: [21.825, 80.21],
+    zoom: 11,
+    area: '1,000 km²',
+    boundary: [
+      [21.72, 80.08],
+      [21.98, 80.15],
+      [22.02, 80.52],
+      [21.78, 80.45],
+    ],
+    zones: [
+      { name: 'Zone A: Balaghat Central', center: [21.815, 80.205], radius: 3500, color: '#10B981', desc: '82% Probable Manganese Reserve (~21.4 MT)' },
+      { name: 'Zone B: Ukwa Northeast Syncline', center: [21.968, 80.468], radius: 4200, color: '#8B5CF6', desc: '79% High Grade Strike (~9.8 MT)' },
+      { name: 'Zone C: Waraseoni Gondite Belt', center: [21.821, 80.174], radius: 2800, color: '#F59E0B', desc: 'Near-Surface Braunite (~4.2 MT)' },
+    ],
+    targets: TOP_PRIORITY_TARGETS,
+  },
+  bhandara: {
+    name: 'Bhandara District, Maharashtra',
+    center: [21.535, 79.712],
+    zoom: 12,
+    area: '750 km²',
+    boundary: [
+      [21.42, 79.55],
+      [21.65, 79.62],
+      [21.68, 79.88],
+      [21.45, 79.82],
+    ],
+    zones: [
+      { name: 'Zone A: Dongri Buzurg Battery-Grade Ore', center: [21.535, 79.712], radius: 3200, color: '#10B981', desc: '88% High Grade Battery-Grade Dioxide Braunite (~14.2 MT)' },
+      { name: 'Zone B: Chikla Deep Underground Syncline', center: [21.558, 79.754], radius: 2600, color: '#8B5CF6', desc: 'Deep Underground Orebody Extension (~6.8 MT)' },
+      { name: 'Zone C: Kurmura Sitasaongi Strike', center: [21.512, 79.684], radius: 2200, color: '#F59E0B', desc: 'Surface Manganese Dioxide (~3.5 MT)' },
+    ],
+    targets: [
+      {
+        id: 'T-047',
+        rank: 1,
+        priority: 'VERY HIGH',
+        score: 96,
+        coordinates: { lat: 21.5350, lng: 79.7120 },
+        locationName: 'Dongri Buzurg Western Flank Quarry',
+        formation: 'Sitasaongi & Mansar Formations',
+        estimatedReserveMT: 2850000,
+        estimatedGradeMn: 46.2,
+        depthMeters: 22,
+        confidence: 0.97,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.28,
+          lstCelsius: 36.2,
+          soilMoisturePercent: 11.2,
+          swirBandRatio: 2.05,
+          magneticAnomalyNT: 198,
+          gravityAnomalyMGal: 5.2,
+        },
+        recommendedAction: 'Priority opencast pushback; deploy 50T dumpers to uncover battery-grade dioxide bench.',
+      },
+      {
+        id: 'T-052',
+        rank: 2,
+        priority: 'VERY HIGH',
+        score: 93,
+        coordinates: { lat: 21.5582, lng: 79.7541 },
+        locationName: 'Chikla Deep Winze Underground Extension',
+        formation: 'Mansar Quartz-Mica Schist with Braunite',
+        estimatedReserveMT: 1980000,
+        estimatedGradeMn: 44.8,
+        depthMeters: 38,
+        confidence: 0.94,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.31,
+          lstCelsius: 34.8,
+          soilMoisturePercent: 13.5,
+          swirBandRatio: 1.88,
+          magneticAnomalyNT: 172,
+          gravityAnomalyMGal: 4.6,
+        },
+        recommendedAction: 'Underground diamond drilling at Level 5 drive along strike N65°E.',
+      },
+      {
+        id: 'T-061',
+        rank: 3,
+        priority: 'HIGH',
+        score: 89,
+        coordinates: { lat: 21.5124, lng: 79.6842 },
+        locationName: 'Kurmura Opencast Gossanous Outcrop',
+        formation: 'Chorbaoli Quartzite contact zone',
+        estimatedReserveMT: 1250000,
+        estimatedGradeMn: 42.6,
+        depthMeters: 18,
+        confidence: 0.90,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.36,
+          lstCelsius: 35.1,
+          soilMoisturePercent: 14.2,
+          swirBandRatio: 1.76,
+          magneticAnomalyNT: 145,
+          gravityAnomalyMGal: 3.9,
+        },
+        recommendedAction: 'Exploratory trenching and ground magnetic profiling across 400m strike length.',
+      },
+      {
+        id: 'T-068',
+        rank: 4,
+        priority: 'HIGH',
+        score: 87,
+        coordinates: { lat: 21.5280, lng: 79.7310 },
+        locationName: 'Sitasaongi South Fold Closure',
+        formation: 'Mansar Schist synclinal keel',
+        estimatedReserveMT: 1420000,
+        estimatedGradeMn: 43.4,
+        depthMeters: 30,
+        confidence: 0.88,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.33,
+          lstCelsius: 35.5,
+          soilMoisturePercent: 12.8,
+          swirBandRatio: 1.82,
+          magneticAnomalyNT: 160,
+          gravityAnomalyMGal: 4.2,
+        },
+        recommendedAction: 'Borehole collar staking to verify down-plunge continuity of south synclinal keel.',
+      },
+    ],
+  },
+  nagpur: {
+    name: 'Nagpur District, Maharashtra',
+    center: [21.392, 79.255],
+    zoom: 12,
+    area: '820 km²',
+    boundary: [
+      [21.28, 79.12],
+      [21.52, 79.18],
+      [21.55, 79.42],
+      [21.31, 79.38],
+    ],
+    zones: [
+      { name: 'Zone A: Mansar Opencast Manganese Lobe', center: [21.392, 79.255], radius: 3100, color: '#10B981', desc: '84% Confirmed Siliceous Braunite (~11.6 MT)' },
+      { name: 'Zone B: Kandri North Syncline', center: [21.415, 79.278], radius: 2500, color: '#8B5CF6', desc: 'High Grade Manganese Reef (~8.4 MT)' },
+      { name: 'Zone C: Gumgaon Underground Deep Lens', center: [21.365, 79.228], radius: 2800, color: '#F59E0B', desc: 'Gondite Manganese Oxide (~5.2 MT)' },
+    ],
+    targets: [
+      {
+        id: 'T-084',
+        rank: 1,
+        priority: 'VERY HIGH',
+        score: 94,
+        coordinates: { lat: 21.3920, lng: 79.2550 },
+        locationName: 'Mansar South Outcrop Orebody',
+        formation: 'Mansar Formation (Sausar Group)',
+        estimatedReserveMT: 2350000,
+        estimatedGradeMn: 44.2,
+        depthMeters: 26,
+        confidence: 0.95,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.30,
+          lstCelsius: 36.8,
+          soilMoisturePercent: 10.8,
+          swirBandRatio: 1.96,
+          magneticAnomalyNT: 188,
+          gravityAnomalyMGal: 4.9,
+        },
+        recommendedAction: 'Execute stage-2 infill core drilling along N75°E strike; deepen pit floor by 12m.',
+      },
+      {
+        id: 'T-089',
+        rank: 2,
+        priority: 'HIGH',
+        score: 91,
+        coordinates: { lat: 21.4152, lng: 79.2784 },
+        locationName: 'Kandri Infill Borehole KB-04',
+        formation: 'Lohangi Marble and Mansar Schist contact',
+        estimatedReserveMT: 1720000,
+        estimatedGradeMn: 43.2,
+        depthMeters: 32,
+        confidence: 0.92,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.34,
+          lstCelsius: 35.4,
+          soilMoisturePercent: 12.2,
+          swirBandRatio: 1.85,
+          magneticAnomalyNT: 168,
+          gravityAnomalyMGal: 4.4,
+        },
+        recommendedAction: 'Core logging of pink calc-silicate contact to confirm footwall boundary.',
+      },
+      {
+        id: 'T-094',
+        rank: 3,
+        priority: 'HIGH',
+        score: 88,
+        coordinates: { lat: 21.3651, lng: 79.2285 },
+        locationName: 'Gumgaon Shaft 2 Deep Exploration',
+        formation: 'Mansar Formation with Braunite-Hollandite',
+        estimatedReserveMT: 1540000,
+        estimatedGradeMn: 42.1,
+        depthMeters: 45,
+        confidence: 0.89,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.32,
+          lstCelsius: 34.6,
+          soilMoisturePercent: 13.9,
+          swirBandRatio: 1.79,
+          magneticAnomalyNT: 155,
+          gravityAnomalyMGal: 4.1,
+        },
+        recommendedAction: 'Sub-level open stoping development and rock mass rating (RMR) validation.',
+      },
+    ],
+  },
+  chhindwara: {
+    name: 'Chhindwara District, MP',
+    center: [21.785, 78.892],
+    zoom: 12,
+    area: '600 km²',
+    boundary: [
+      [21.68, 78.75],
+      [21.92, 78.82],
+      [21.95, 79.08],
+      [21.71, 78.98],
+    ],
+    zones: [
+      { name: 'Zone A: Tirodi Western Opencast', center: [21.785, 78.892], radius: 3400, color: '#10B981', desc: '81% Braunite Ore Bed (~9.1 MT)' },
+      { name: 'Zone B: Sitapatore Braunite Belt', center: [21.812, 78.924], radius: 2400, color: '#8B5CF6', desc: 'Strike Extension (~4.9 MT)' },
+      { name: 'Zone C: Jamrapani Gondite Horizon', center: [21.754, 78.854], radius: 2100, color: '#F59E0B', desc: 'Coarse Braunite (~2.8 MT)' },
+    ],
+    targets: [
+      {
+        id: 'T-105',
+        rank: 1,
+        priority: 'VERY HIGH',
+        score: 93,
+        coordinates: { lat: 21.7850, lng: 78.8920 },
+        locationName: 'Tirodi West Bench Quarry',
+        formation: 'Tirodi Biotite Gneiss & Mansar Schist',
+        estimatedReserveMT: 2100000,
+        estimatedGradeMn: 43.2,
+        depthMeters: 24,
+        confidence: 0.94,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.29,
+          lstCelsius: 36.4,
+          soilMoisturePercent: 11.5,
+          swirBandRatio: 1.92,
+          magneticAnomalyNT: 180,
+          gravityAnomalyMGal: 4.7,
+        },
+        recommendedAction: 'Blasting optimization for coarse braunite recovery; bench widening on West face.',
+      },
+      {
+        id: 'T-112',
+        rank: 2,
+        priority: 'HIGH',
+        score: 89,
+        coordinates: { lat: 21.8124, lng: 78.9241 },
+        locationName: 'Sitapatore North Collar',
+        formation: 'Mansar Schist with Gondite quartzite',
+        estimatedReserveMT: 1450000,
+        estimatedGradeMn: 42.8,
+        depthMeters: 28,
+        confidence: 0.91,
+        fieldStatus: 'Verified',
+        satelliteIndicators: {
+          ndvi: 0.33,
+          lstCelsius: 35.2,
+          soilMoisturePercent: 13.1,
+          swirBandRatio: 1.81,
+          magneticAnomalyNT: 164,
+          gravityAnomalyMGal: 4.3,
+        },
+        recommendedAction: 'Electromagnetic anomaly drilling across Sitapatore north ridge strike.',
+      },
+    ],
+  },
+};
 
 export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
   onSelectTarget,
   selectedTarget: propSelectedTarget,
+  selectedRegion = 'Balaghat District, MP',
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
   const zonesLayerRef = useRef<L.LayerGroup | null>(null);
 
+  const getSectorKey = (regionStr: string) => {
+    if (regionStr.includes('Bhandara')) return 'bhandara';
+    if (regionStr.includes('Nagpur')) return 'nagpur';
+    if (regionStr.includes('Chhindwara')) return 'chhindwara';
+    return 'balaghat';
+  };
+
+  const sectorKey = getSectorKey(selectedRegion);
+  const currentSector = SECTOR_CONFIGS[sectorKey];
+
   const [activeBasemap, setActiveBasemap] = useState<'satellite' | 'streets' | 'topo'>('satellite');
   const [showHeatmapZones, setShowHeatmapZones] = useState(true);
   const [showBoreholes, setShowBoreholes] = useState(true);
   const [selectedTarget, setSelectedTarget] = useState<ExplorationTarget | null>(
-    propSelectedTarget || TOP_PRIORITY_TARGETS[0]
+    propSelectedTarget || currentSector.targets[0]
   );
   const [filterMinGrade, setFilterMinGrade] = useState<number>(40);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // MOIL Mine Central Coordinates (Balaghat district, MP)
-  const CENTER_LAT = 21.825;
-  const CENTER_LNG = 80.21;
 
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
@@ -57,8 +358,8 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
     });
 
     const map = L.map(mapContainerRef.current, {
-      center: [CENTER_LAT, CENTER_LNG],
-      zoom: 11,
+      center: currentSector.center,
+      zoom: currentSector.zoom,
       zoomControl: false,
     });
 
@@ -115,6 +416,15 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
     };
   }, []);
 
+  // Update map viewport when region changes
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo(currentSector.center, currentSector.zoom, { duration: 1.2 });
+    }
+    setSelectedTarget(currentSector.targets[0]);
+    if (onSelectTarget) onSelectTarget(currentSector.targets[0]);
+  }, [selectedRegion]);
+
   // Update Basemap Layer
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -133,7 +443,7 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
     if (activeBasemap === 'topo') baseLayers.topo.addTo(map);
   }, [activeBasemap]);
 
-  // Update Markers & Zones
+  // Update Markers & Zones per Selected Sector
   useEffect(() => {
     const map = mapInstanceRef.current;
     const layerGroup = layerGroupRef.current;
@@ -143,77 +453,40 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
     layerGroup.clearLayers();
     zonesGroup.clearLayers();
 
-    // 1. Draw High-Confidence Reserve Heatmap Zones (Polygons & Circles)
+    // 1. Draw High-Confidence Reserve Heatmap Zones for current sector
     if (showHeatmapZones) {
-      // Balaghat Central Zone
-      L.circle([21.815, 80.205], {
-        color: '#10B981',
-        fillColor: '#10B981',
-        fillOpacity: 0.25,
-        weight: 2,
-        dashArray: '5, 5',
-        radius: 3500,
-      })
-        .bindTooltip('<b>Zone A: Balaghat Central</b><br/>82% Probable Manganese Reserve (~21.4 MT)', {
-          permanent: false,
-          direction: 'top',
-        })
-        .addTo(zonesGroup);
-
-      // Ukwa Syncline Zone
-      L.circle([21.968, 80.468], {
-        color: '#8B5CF6',
-        fillColor: '#8B5CF6',
-        fillOpacity: 0.22,
-        weight: 2,
-        dashArray: '5, 5',
-        radius: 4200,
-      })
-        .bindTooltip('<b>Zone B: Ukwa Northeast Syncline</b><br/>79% High Grade Strike (~9.8 MT)', {
-          permanent: false,
-          direction: 'top',
-        })
-        .addTo(zonesGroup);
-
-      // Waraseoni West Outcrop
-      L.circle([21.821, 80.174], {
-        color: '#F59E0B',
-        fillColor: '#F59E0B',
-        fillOpacity: 0.2,
-        weight: 2,
-        dashArray: '4, 4',
-        radius: 2800,
-      })
-        .bindTooltip('<b>Zone C: Waraseoni Gondite Belt</b><br/>Near-Surface Braunite (~4.2 MT)', {
-          permanent: false,
-          direction: 'top',
-        })
-        .addTo(zonesGroup);
-
-      // 1,000 km2 Exploration Boundary Polygon
-      L.polygon(
-        [
-          [21.72, 80.08],
-          [21.98, 80.15],
-          [22.02, 80.52],
-          [21.78, 80.45],
-        ],
-        {
-          color: '#3B82F6',
+      currentSector.zones.forEach((z) => {
+        L.circle(z.center, {
+          color: z.color,
+          fillColor: z.color,
+          fillOpacity: 0.24,
           weight: 2,
-          fillColor: '#3B82F6',
-          fillOpacity: 0.05,
-          dashArray: '8, 6',
-        }
-      )
-        .bindTooltip('<b>1,000 km² MOIL Exploration Boundary</b><br/>Balaghat–Sausar Metallogenic Belt', {
+          dashArray: '5, 5',
+          radius: z.radius,
+        })
+          .bindTooltip(`<b>${z.name}</b><br/>${z.desc}`, {
+            permanent: false,
+            direction: 'top',
+          })
+          .addTo(zonesGroup);
+      });
+
+      // Regional Exploration Boundary Polygon
+      L.polygon(currentSector.boundary, {
+        color: '#3B82F6',
+        weight: 2,
+        fillColor: '#3B82F6',
+        fillOpacity: 0.06,
+        dashArray: '8, 6',
+      })
+        .bindTooltip(`<b>${currentSector.area} MOIL Exploration Boundary</b><br/>${currentSector.name}`, {
           permanent: false,
         })
         .addTo(zonesGroup);
     }
 
-    // 2. Filter Targets
-    const visibleTargets = TOP_PRIORITY_TARGETS.filter((t) => {
+    // 2. Filter Targets for active sector
+    const visibleTargets = currentSector.targets.filter((t) => {
       const matchGrade = t.estimatedGradeMn >= filterMinGrade;
       const matchSearch =
         t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -305,11 +578,11 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
         marker.addTo(layerGroup);
       });
     }
-  }, [showHeatmapZones, showBoreholes, filterMinGrade, searchQuery, selectedTarget]);
+  }, [showHeatmapZones, showBoreholes, filterMinGrade, searchQuery, selectedTarget, sectorKey]);
 
   const handleRecenter = () => {
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.setView([CENTER_LAT, CENTER_LNG], 11, { animate: true });
+      mapInstanceRef.current.setView(currentSector.center, currentSector.zoom, { animate: true });
     }
   };
 
@@ -321,7 +594,7 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <h3 className="text-sm font-black text-slate-900 tracking-tight">
-              Interactive Manganese Reserve Map (Balaghat Mining Concession)
+              Interactive Manganese Reserve Map ({currentSector.name})
             </h3>
             <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-100 text-blue-700">
               LEAFLET GIS ENGINE

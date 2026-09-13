@@ -107,17 +107,19 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
     setIsApiKeyModalOpen(true);
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   return (
     <div className="flex h-screen w-screen bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans antialiased">
-      {/* Sidebar Navigation */}
-      <Sidebar
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        onTabChange={setActiveTab}
-        onOpenApiKeyModal={handleOpenApiKey}
-        onOpenLoginModal={openLoginModal}
-        onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
-      />
+      {/* Collapsible Sidebar Navigation */}
+      {isSidebarOpen && (
+        <Sidebar
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          onTabChange={setActiveTab}
+          selectedRegion={selectedRegion}
+        />
+      )}
 
       {/* Main App Container */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
@@ -125,12 +127,9 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
         <Header
           onAnalyzeClick={() => setIsAnalyzeModalOpen(true)}
           onViewPreviousClick={() => setIsPreviousModalOpen(true)}
-          onOpenApiKeyModal={handleOpenApiKey}
-          onOpenLoginModal={openLoginModal}
-          onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
           selectedRegion={selectedRegion}
           onRegionChange={setSelectedRegion}
-          onOpenShowcase={onOpenShowcase}
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
 
         {/* Scrollable View Content */}
@@ -147,8 +146,8 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
               onOpenFullExplorer={() => setActiveTab('prospectivity-explorer')}
               verifiedCount={verifiedCount}
               onVerifyTarget={handleVerifyTarget}
-              onOpenApiKeyModal={handleOpenApiKey}
               onNavigateToProduction={() => setActiveTab('production-intelligence')}
+              selectedRegion={selectedRegion}
             />
           )}
 
@@ -185,10 +184,6 @@ function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
           )}
 
           {activeTab === 'reports-impact' && <ReportsImpactView />}
-
-          {activeTab === 'data-health' && <DataHealthView />}
-
-          {activeTab === 'source-code' && <SourceCodeView />}
         </main>
       </div>
 
@@ -248,9 +243,9 @@ function MainApp() {
   // Starts directly on the public showcase as requested:
   const [currentView, setCurrentView] = useState<'home' | 'login' | 'register' | 'dashboard'>('home');
 
-  // When user logs out, return to showcase
+  // When user logs out, return to login page as requested
   useEffect(() => {
-    const handleLogout = () => setCurrentView('home');
+    const handleLogout = () => setCurrentView('login');
     window.addEventListener('mine_intel_logout', handleLogout);
     return () => window.removeEventListener('mine_intel_logout', handleLogout);
   }, []);

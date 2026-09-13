@@ -25,6 +25,7 @@ interface SidebarProps {
   onOpenApiKeyModal?: (tab?: 'gemini' | 'map') => void;
   onOpenLoginModal?: () => void;
   onOpenDatabaseModal?: () => void;
+  selectedRegion?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -34,6 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenApiKeyModal,
   onOpenLoginModal,
   onOpenDatabaseModal,
+  selectedRegion = 'Balaghat, Madhya Pradesh',
 }) => {
   const { user } = useAuth();
 
@@ -83,20 +85,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: <Activity className="w-4 h-4" />,
       badge: '100 Targets',
       badgeColor: 'bg-indigo-100 text-indigo-800',
-    },
-    {
-      id: 'data-health',
-      label: '9 System Data Inputs',
-      icon: <Database className="w-4 h-4" />,
-      badge: 'Active Feeds',
-      badgeColor: 'bg-slate-100 text-slate-700 font-bold',
-    },
-    {
-      id: 'source-code',
-      label: 'Source Code & Download',
-      icon: <Code className="w-4 h-4" />,
-      badge: 'Frontend & Backend',
-      badgeColor: 'bg-blue-100 text-blue-800 font-bold',
     },
   ];
 
@@ -184,44 +172,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         )}
 
-        {/* Database & Keys quick action buttons */}
-        <div className="grid grid-cols-2 gap-1.5">
-          {onOpenDatabaseModal && (
-            <button
-              id="sidebar-btn-database"
-              type="button"
-              onClick={onOpenDatabaseModal}
-              className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 transition-colors cursor-pointer"
-              title="Central Database Connection"
-            >
-              <Database className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Geodatabase</span>
-            </button>
-          )}
-
-          {onOpenApiKeyModal && (
-            <button
-              id="sidebar-btn-api-key"
-              type="button"
-              onClick={() => onOpenApiKeyModal('gemini')}
-              className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-slate-50 hover:bg-blue-50 hover:text-blue-700 text-slate-700 text-[11px] font-semibold border border-slate-200 transition-colors cursor-pointer"
-              title="Configure Gemini & Map API Keys"
-            >
-              <Key className="w-3.5 h-3.5 text-blue-600" />
-              <span>API Keys</span>
-            </button>
-          )}
-        </div>
-
-        {/* Region Indicator */}
-        <div id="sidebar-region-indicator" className="p-2 bg-slate-50 border border-slate-200/80 rounded-lg text-center">
-          <div className="text-[11px] font-bold text-slate-800">
-            Balaghat, MP (1,000 km²)
-          </div>
-          <div className="text-[9px] text-slate-500 font-medium">
-            Sausar Belt · GSI Stratigraphy
-          </div>
-        </div>
+        {/* Dynamic Synchronized Region Indicator */}
+        {(() => {
+          let title = 'Balaghat, MP (1,000 km²)';
+          let subtitle = 'Sausar Belt · GSI Stratigraphy';
+          if (selectedRegion.includes('Bhandara')) {
+            title = 'Bhandara, Maharashtra (750 km²)';
+            subtitle = 'Dongri Buzurg & Chikla Sector';
+          } else if (selectedRegion.includes('Nagpur')) {
+            title = 'Nagpur, Maharashtra (820 km²)';
+            subtitle = 'Mansar, Kandri & Gumgaon Sector';
+          } else if (selectedRegion.includes('Chhindwara')) {
+            title = 'Chhindwara, MP (600 km²)';
+            subtitle = 'Tirodi & Sitapatore Sector';
+          }
+          return (
+            <div id="sidebar-region-indicator" className="p-2.5 bg-blue-50/70 border border-blue-200 rounded-xl text-center shadow-2xs">
+              <div className="text-[11px] font-bold text-blue-900">
+                {title}
+              </div>
+              <div className="text-[10px] text-blue-700/90 font-medium mt-0.5">
+                {subtitle}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </aside>
   );

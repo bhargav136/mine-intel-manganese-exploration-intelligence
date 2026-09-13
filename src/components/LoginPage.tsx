@@ -106,8 +106,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         if (!res.success) {
           setError(res.error || 'Authentication failed. Verify credentials.');
         } else {
-          if (onSuccess) onSuccess();
-          if (onClose) onClose();
+          if (onSuccess) {
+            onSuccess();
+          } else if (onClose) {
+            onClose();
+          }
         }
       } else {
         if (!name || !email) {
@@ -119,8 +122,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         if (!res.success) {
           setError(res.error || 'Registration failed.');
         } else {
-          if (onSuccess) onSuccess();
-          if (onClose) onClose();
+          if (onSuccess) {
+            onSuccess();
+          } else if (onClose) {
+            onClose();
+          }
         }
       }
     } finally {
@@ -132,8 +138,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setEmail(profile.email);
     setPassword('password123');
     switchUser(profile);
-    if (onSuccess) onSuccess();
-    if (onClose) onClose();
+    if (onSuccess) {
+      onSuccess();
+    } else if (onClose) {
+      onClose();
+    }
   };
 
   return (
