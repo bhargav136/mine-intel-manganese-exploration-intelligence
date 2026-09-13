@@ -18,6 +18,8 @@ import {
   Flame,
   Droplet,
   Compass,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { ExplorationTarget } from '../types';
 import { TOP_PRIORITY_TARGETS, MOIL_MINE_SITES } from '../data/mockData';
@@ -353,6 +355,32 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
   );
   const [filterMinGrade, setFilterMinGrade] = useState<number>(40);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    setIsFullscreen((prev) => {
+      const next = !prev;
+      setTimeout(() => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.invalidateSize();
+        }
+      }, 150);
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+        setTimeout(() => {
+          mapInstanceRef.current?.invalidateSize();
+        }, 150);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
@@ -691,7 +719,14 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
   };
 
   return (
-    <div id="big-accurate-leaflet-map-card" className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[750px]">
+    <div
+      id="big-accurate-leaflet-map-card"
+      className={`bg-white transition-all overflow-hidden flex flex-col ${
+        isFullscreen
+          ? 'fixed inset-0 z-[99999] w-screen h-screen rounded-none border-none shadow-2xl'
+          : 'rounded-2xl border border-slate-200 shadow-sm h-[750px]'
+      }`}
+    >
       {/* Top Map Control Bar */}
       <div className="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50">
         <div>
@@ -781,6 +816,20 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
             title="Recenter Map on Balaghat"
           >
             <Crosshair className="w-4 h-4" />
+          </button>
+
+          {/* Fullscreen Button in top toolbar */}
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className={`p-1.5 rounded-lg border transition-colors cursor-pointer flex items-center gap-1 text-xs font-bold ${
+              isFullscreen
+                ? 'bg-blue-50 text-blue-700 border-blue-200'
+                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+            }`}
+            title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Map'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
       </div>
@@ -940,6 +989,27 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
               <span className="font-medium text-slate-600 text-[11px]">Inferred / Low (&lt; 40% Mn)</span>
             </div>
           </div>
+
+          {/* YouTube-Style Fullscreen Button on Bottom Right */}
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="absolute bottom-4 right-4 z-[1000] px-3.5 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white backdrop-blur-md border border-slate-700 shadow-xl transition-all cursor-pointer flex items-center gap-2 text-xs font-bold group focus:outline-none focus:ring-2 focus:ring-cyan-400 select-none"
+            title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Fullscreen Map (like YouTube)'}
+            aria-label={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen Map'}
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span className="font-sans">Exit Fullscreen</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span className="font-sans">Fullscreen</span>
+              </>
+            )}
+          </button>
         </div>
 
         {/* Selected Target Reserve Inspector Sidebar */}
