@@ -73,7 +73,7 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
             <option value="spectral">ASTER Band 12/11 (Mn-Oxides)</option>
             <option value="satellite-prospecting">🛰️ Satellite Prospecting (NDVI, Moisture, LST, Terrain)</option>
             <option value="reserve-heatmap">🤖 AI Reserve Heatmap (Drill + Geo + Space)</option>
-            <option value="google-satellite">Google Maps / ESRI True Satellite</option>
+            <option value="google-satellite">🛰️ High-Res Satellite Orthomosaic (Balaghat & Ukwa Pit)</option>
             <option value="geological">GSI Gondite & Quartzite Contact</option>
             <option value="lineaments">Aeromagnetic Fault Lineaments</option>
           </select>
@@ -154,18 +154,30 @@ export const InteractiveMap: React.FC<InteractiveMapProps> = ({
               </pattern>
             </defs>
 
-            {/* Background terrain base */}
-            <rect width="1000" height="700" fill="#E4EDE2" />
+            {/* Background terrain base or True Satellite Orthomosaic */}
+            {mapLayer === 'google-satellite' ? (
+              <image
+                href="https://images.unsplash.com/photo-1578328819058-b69f3a3b0f6b?auto=format&fit=crop&w=1600&q=80"
+                width="1000"
+                height="700"
+                preserveAspectRatio="xMidYMid slice"
+                opacity="0.88"
+              />
+            ) : (
+              <>
+                <rect width="1000" height="700" fill="#E4EDE2" />
 
-            {/* Highland & Forest Patches (Balaghat Satpura ranges) */}
-            <path
-              d="M 100,0 Q 250,80 400,40 T 700,20 Q 880,90 1000,30 L 1000,0 Z"
-              fill="#D5E4D1"
-            />
-            <path
-              d="M 680,200 Q 820,280 920,420 T 1000,600 L 1000,100 Z"
-              fill="#D8E7D4"
-            />
+                {/* Highland & Forest Patches (Balaghat Satpura ranges) */}
+                <path
+                  d="M 100,0 Q 250,80 400,40 T 700,20 Q 880,90 1000,30 L 1000,0 Z"
+                  fill="#D5E4D1"
+                />
+                <path
+                  d="M 680,200 Q 820,280 920,420 T 1000,600 L 1000,100 Z"
+                  fill="#D8E7D4"
+                />
+              </>
+            )}
             <path
               d="M 0,350 Q 80,480 180,520 T 260,700 L 0,700 Z"
               fill="#DAE8D6"
