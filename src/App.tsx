@@ -31,7 +31,7 @@ import { ProjectOverviewView } from './components/ProjectOverviewView';
 import { SourceCodeView } from './components/SourceCodeView';
 import { NavigationTab, ExplorationTarget } from './types';
 
-function DashboardView() {
+function DashboardView({ onOpenShowcase }: { onOpenShowcase?: () => void }) {
   const { user, isLoginModalOpen, openLoginModal, closeLoginModal } = useAuth();
   const [activeTab, setActiveTab] = useState<NavigationTab>('project-overview');
   const [targets, setTargets] = useState<ExplorationTarget[]>(TOP_PRIORITY_TARGETS);
@@ -130,6 +130,7 @@ function DashboardView() {
           onOpenDatabaseModal={() => setIsDatabaseModalOpen(true)}
           selectedRegion={selectedRegion}
           onRegionChange={setSelectedRegion}
+          onOpenShowcase={onOpenShowcase}
         />
 
         {/* Scrollable View Content */}
@@ -244,11 +245,12 @@ function DashboardView() {
 
 function MainApp() {
   const { user, isLoading } = useAuth();
-  const [currentView, setCurrentView] = useState<'home' | 'login' | 'register'>('login');
+  // Starts directly on the public showcase as requested:
+  const [currentView, setCurrentView] = useState<'home' | 'login' | 'register' | 'dashboard'>('home');
 
-  // When user logs out, always go back to login page
+  // When user logs out, return to showcase
   useEffect(() => {
-    const handleLogout = () => setCurrentView('login');
+    const handleLogout = () => setCurrentView('home');
     window.addEventListener('mine_intel_logout', handleLogout);
     return () => window.removeEventListener('mine_intel_logout', handleLogout);
   }, []);
@@ -264,28 +266,18 @@ function MainApp() {
     );
   }
 
-  // If user is authenticated, go straight to Dashboard!
-  if (user) {
-    return <DashboardView />;
+  // Once authenticated and in dashboard view, render full Dashboard with all components
+  if (currentView === 'dashboard' && user) {
+    return <DashboardView onOpenShowcase={() => setCurrentView('home')} />;
   }
 
-  // Public Landing Page
-  if (currentView === 'home') {
-    return (
-      <LandingPage
-        onOpenLogin={() => setCurrentView('login')}
-        onOpenRegister={() => setCurrentView('register')}
-      />
-    );
-  }
-
-  // If user clicked Register — full-page register form with back link
-  if (currentView === 'register') {
+  // If user navigated to Login page
+  if (currentView === 'login') {
     return (
       <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
         <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
           <button
-            onClick={() => setCurrentView('login')}
+            onClick={() => setCurrentView('home')}
             className="flex items-center gap-2 cursor-pointer"
           >
             <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
@@ -294,18 +286,19 @@ function MainApp() {
             <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
           </button>
           <button
-            onClick={() => setCurrentView('login')}
+            onClick={() => setCurrentView('home')}
             className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
           >
-            &larr; Back to Login
+            &larr; Back to Showcase
           </button>
         </header>
         <main className="flex-1 flex items-center justify-center p-4">
           <LoginPage
             isOpen={true}
             isFullPage={true}
-            initialTab="signup"
-            onClose={() => setCurrentView('login')}
+            initialTab="signin"
+            onSuccess={() => setCurrentView('dashboard')}
+            onClose={() => setCurrentView('home')}
             onViewLanding={() => setCurrentView('home')}
           />
         </main>
@@ -313,36 +306,60 @@ function MainApp() {
     );
   }
 
-  // Default: Login Page (matches sample site's behaviour — opens login on initial visit)
+  // If user navigated to Register page
+  if (currentView === 'register') {
+    return (
+      <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
+        <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
+          <button
+            onClick={() => setCurrentView('home')}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
+              M
+            </div>
+            <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
+          </button>
+          <button
+            onClick={() => setCurrentView('home')}
+            className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+          >
+            &larr; Back to Showcase
+          </button>
+        </header>
+        <main className="flex-1 flex items-center justify-center p-4">
+          <LoginPage
+            isOpen={true}
+            isFullPage={true}
+            initialTab="signup"
+            onSuccess={() => setCurrentView('dashboard')}
+            onClose={() => setCurrentView('home')}
+            onViewLanding={() => setCurrentView('home')}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Default: Starts directly from Public Showcase!
   return (
-    <div className="min-h-screen bg-[#f5f8fd] flex flex-col">
-      <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-50">
-        <button
-          onClick={() => setCurrentView('home')}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-black text-sm">
-            M
-          </div>
-          <span className="font-bold text-slate-900 text-base">MINE-INTEL</span>
-        </button>
-        <button
-          onClick={() => setCurrentView('home')}
-          className="text-xs font-semibold text-slate-500 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
-        >
-          View Public Showcase &rarr;
-        </button>
-      </header>
-      <main className="flex-1 flex items-center justify-center p-4">
-        <LoginPage
-          isOpen={true}
-          isFullPage={true}
-          initialTab="signin"
-          onClose={() => setCurrentView('home')}
-          onViewLanding={() => setCurrentView('home')}
-        />
-      </main>
-    </div>
+    <LandingPage
+      onOpenLogin={() => {
+        if (user) {
+          setCurrentView('dashboard');
+        } else {
+          setCurrentView('login');
+        }
+      }}
+      onOpenRegister={() => {
+        // "when we click on get started it goes to the login page after that all components will open"
+        if (user) {
+          setCurrentView('dashboard');
+        } else {
+          setCurrentView('login');
+        }
+      }}
+    />
   );
 }
 

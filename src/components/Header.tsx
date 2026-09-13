@@ -22,6 +22,7 @@ interface HeaderProps {
   onOpenDatabaseModal?: () => void;
   selectedRegion?: string;
   onRegionChange?: (region: string) => void;
+  onOpenShowcase?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenDatabaseModal,
   selectedRegion = 'Balaghat, Madhya Pradesh',
   onRegionChange,
+  onOpenShowcase,
 }) => {
   const { user, logout } = useAuth();
   const [hasApiKey, setHasApiKey] = useState(false);
@@ -216,6 +218,19 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <LogOut className="w-3.5 h-3.5 text-rose-500" />
             <span className="hidden sm:inline">Logout</span>
+          </button>
+        )}
+
+        {/* Public Showcase Button */}
+        {onOpenShowcase && (
+          <button
+            type="button"
+            id="header-btn-showcase"
+            onClick={onOpenShowcase}
+            className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-slate-600 hover:text-blue-700 text-xs font-semibold transition-all bg-white shadow-2xs"
+            title="View Public Showcase"
+          >
+            <span>🌐 Showcase</span>
           </button>
         )}
 
