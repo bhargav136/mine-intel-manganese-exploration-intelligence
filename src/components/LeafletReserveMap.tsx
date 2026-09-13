@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { ExplorationTarget } from '../types';
 import { TOP_PRIORITY_TARGETS, MOIL_MINE_SITES } from '../data/mockData';
+import { InfoTooltip } from './InfoTooltip';
 
 interface LeafletReserveMapProps {
   onSelectTarget?: (target: ExplorationTarget) => void;
@@ -975,7 +976,10 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
                 </div>
 
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                  <div className="text-[10px] text-slate-500 font-semibold">Ore Grade (% Mn)</div>
+                  <div className="text-[10px] text-slate-500 font-semibold flex items-center">
+                    <span>Ore Grade (% Mn)</span>
+                    <InfoTooltip termKey="grade" position="top" />
+                  </div>
                   <div className="text-lg font-black text-emerald-600 mt-0.5">
                     {selectedTarget.estimatedGradeMn}%
                   </div>
@@ -991,7 +995,10 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
                 </div>
 
                 <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                  <div className="text-[10px] text-slate-500 font-semibold">AI Confidence</div>
+                  <div className="text-[10px] text-slate-500 font-semibold flex items-center">
+                    <span>AI Confidence</span>
+                    <InfoTooltip termKey="confidence" position="top" />
+                  </div>
                   <div className="text-lg font-black text-blue-600 mt-0.5">
                     {Math.round(selectedTarget.confidence * 100)}%
                   </div>
@@ -1006,22 +1013,52 @@ export const LeafletReserveMap: React.FC<LeafletReserveMapProps> = ({
                   <span>Integrated Satellite Inputs</span>
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">ASTER SWIR (B12/B11 Ratio):</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 flex items-center">
+                      <span>ASTER SWIR (B12/B11):</span>
+                      <InfoTooltip termKey="swir" position="top" />
+                    </span>
                     <span className="font-bold text-slate-800">{selectedTarget.satelliteIndicators.swirBandRatio}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Vegetation Index (NDVI):</span>
-                    <span className="font-bold text-slate-800">{selectedTarget.satelliteIndicators.ndvi} (Stress Outcrop)</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 flex items-center">
+                      <span>Vegetation Index (NDVI):</span>
+                      <InfoTooltip termKey="ndvi" position="top" />
+                    </span>
+                    <span className="font-bold text-slate-800">{selectedTarget.satelliteIndicators.ndvi} (Stress)</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Land Surface Temp (LST):</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 flex items-center">
+                      <span>Land Surface Temp (LST):</span>
+                      <InfoTooltip termKey="lst" position="top" />
+                    </span>
                     <span className="font-bold text-slate-800">{selectedTarget.satelliteIndicators.lstCelsius}°C</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">SAR Soil Moisture:</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 flex items-center">
+                      <span>SAR Soil Moisture:</span>
+                      <InfoTooltip termKey="soilMoisture" position="top" />
+                    </span>
                     <span className="font-bold text-slate-800">{selectedTarget.satelliteIndicators.soilMoisturePercent}%</span>
                   </div>
+                  {selectedTarget.satelliteIndicators.magneticAnomalyNT && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 flex items-center">
+                        <span>Magnetic Anomaly:</span>
+                        <InfoTooltip termKey="magneticAnomaly" position="top" />
+                      </span>
+                      <span className="font-bold text-slate-800">{selectedTarget.satelliteIndicators.magneticAnomalyNT} nT</span>
+                    </div>
+                  )}
+                  {selectedTarget.satelliteIndicators.gravityAnomalyMGal && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 flex items-center">
+                        <span>Gravity Anomaly:</span>
+                        <InfoTooltip termKey="gravityAnomaly" position="top" />
+                      </span>
+                      <span className="font-bold text-slate-800">+{selectedTarget.satelliteIndicators.gravityAnomalyMGal} mGal</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

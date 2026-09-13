@@ -9,6 +9,7 @@ import {
   Sliders,
   CheckCircle2,
 } from 'lucide-react';
+import { InfoTooltip } from './InfoTooltip';
 
 export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan }) => {
   const [activeLayer, setActiveLayer] = useState<
@@ -64,6 +65,7 @@ export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan
                   source: 'Sentinel-2 MSI (10m)',
                   color: 'text-purple-600',
                   bg: 'bg-purple-50',
+                  termKey: 'swir',
                 },
                 {
                   id: 'ndvi',
@@ -72,6 +74,7 @@ export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan
                   source: 'Sentinel-2 (10m)',
                   color: 'text-emerald-600',
                   bg: 'bg-emerald-50',
+                  termKey: 'ndvi',
                 },
                 {
                   id: 'lst',
@@ -80,6 +83,7 @@ export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan
                   source: 'Landsat-9 TIR (30m)',
                   color: 'text-amber-600',
                   bg: 'bg-amber-50',
+                  termKey: 'lst',
                 },
                 {
                   id: 'soil-moisture',
@@ -88,6 +92,7 @@ export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan
                   source: 'Sentinel-1 C-Band SAR',
                   color: 'text-blue-600',
                   bg: 'bg-blue-50',
+                  termKey: 'soilMoisture',
                 },
                 {
                   id: 'aeromagnetic',
@@ -96,6 +101,7 @@ export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan
                   source: 'GSI Airborne Survey',
                   color: 'text-rose-600',
                   bg: 'bg-rose-50',
+                  termKey: 'magneticAnomaly',
                 },
                 {
                   id: 'true-color',
@@ -104,6 +110,7 @@ export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan
                   source: 'Sentinel-2 RGB',
                   color: 'text-slate-600',
                   bg: 'bg-slate-100',
+                  tooltipText: 'Natural true-color satellite imagery combining red, green, and blue spectral bands.',
                 },
               ].map((layer) => {
                 const isSelected = activeLayer === layer.id;
@@ -118,8 +125,9 @@ export const AnalyzeAreaView: React.FC<{ onRunScan: () => void }> = ({ onRunScan
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-800">
-                        {layer.name}
+                      <span className="text-xs font-bold text-slate-800 flex items-center">
+                        <span>{layer.name}</span>
+                        <InfoTooltip termKey={layer.termKey} text={layer.tooltipText} position="top" />
                       </span>
                       {isSelected && (
                         <CheckCircle2 className="w-4 h-4 text-blue-600" />

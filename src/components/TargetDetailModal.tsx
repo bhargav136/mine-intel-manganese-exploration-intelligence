@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { ExplorationTarget, BoreholeAssay } from '../types';
 import { getGeminiHeaders, getSelectedModel } from '../lib/geminiApi';
+import { InfoTooltip } from './InfoTooltip';
 
 interface TargetDetailModalProps {
   target: ExplorationTarget | null;
@@ -115,14 +116,15 @@ export const TargetDetailModal: React.FC<TargetDetailModalProps> = ({
           {/* Key Metrics Grid */}
           <div className="grid grid-cols-3 gap-3">
             <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200/80">
-              <span className="text-[11px] font-medium text-slate-500">
+              <span className="text-[11px] font-medium text-slate-500 flex items-center">
                 Estimated Reserve
               </span>
               <div className="text-lg font-bold text-slate-900 mt-0.5">
                 {(target.estimatedReserveMT / 1000000).toFixed(2)} M MT
               </div>
-              <span className="text-[10px] text-emerald-600 font-semibold">
+              <span className="text-[10px] text-emerald-600 font-semibold inline-flex items-center">
                 @ {target.estimatedGradeMn}% Mn Grade
+                <InfoTooltip termKey="grade" position="top" />
               </span>
             </div>
 
@@ -153,8 +155,9 @@ export const TargetDetailModal: React.FC<TargetDetailModalProps> = ({
                   </span>
                 )}
               </div>
-              <span className="text-[10px] text-slate-500">
-                AI Confidence: {(target.confidence * 100).toFixed(0)}%
+              <span className="text-[10px] text-slate-500 inline-flex items-center">
+                Confidence: {(target.confidence * 100).toFixed(0)}%
+                <InfoTooltip termKey="confidence" position="top" />
               </span>
             </div>
           </div>
@@ -183,8 +186,9 @@ export const TargetDetailModal: React.FC<TargetDetailModalProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] text-slate-500">
-                    NDVI (Vegetation Index)
+                  <div className="text-[11px] text-slate-500 flex items-center">
+                    <span>NDVI (Vegetation Index)</span>
+                    <InfoTooltip termKey="ndvi" position="top" />
                   </div>
                   <div className="text-xs font-semibold text-slate-800">
                     {target.satelliteIndicators.ndvi} (Stressed canopy)
@@ -197,8 +201,9 @@ export const TargetDetailModal: React.FC<TargetDetailModalProps> = ({
 
               <div className="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] text-slate-500">
-                    Land Surface Temp (LST)
+                  <div className="text-[11px] text-slate-500 flex items-center">
+                    <span>Land Surface Temp (LST)</span>
+                    <InfoTooltip termKey="lst" position="top" />
                   </div>
                   <div className="text-xs font-semibold text-slate-800 flex items-center gap-1">
                     <Thermometer className="w-3.5 h-3.5 text-amber-500" />
@@ -212,8 +217,9 @@ export const TargetDetailModal: React.FC<TargetDetailModalProps> = ({
 
               <div className="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] text-slate-500">
-                    Soil Moisture (SAR Radar)
+                  <div className="text-[11px] text-slate-500 flex items-center">
+                    <span>Soil Moisture %</span>
+                    <InfoTooltip termKey="soilMoisture" position="top" />
                   </div>
                   <div className="text-xs font-semibold text-slate-800 flex items-center gap-1">
                     <CloudRain className="w-3.5 h-3.5 text-blue-500" />
@@ -227,8 +233,9 @@ export const TargetDetailModal: React.FC<TargetDetailModalProps> = ({
 
               <div className="p-3 rounded-lg border border-slate-200 bg-white flex items-center justify-between">
                 <div>
-                  <div className="text-[11px] text-slate-500">
-                    SWIR Band 11/12 (Mn Oxide)
+                  <div className="text-[11px] text-slate-500 flex items-center">
+                    <span>SWIR Band Ratio (Mn Oxide)</span>
+                    <InfoTooltip termKey="swir" position="top" />
                   </div>
                   <div className="text-xs font-semibold text-slate-800">
                     {target.satelliteIndicators.swirBandRatio} Diagnostic Ratio

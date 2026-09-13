@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { ExplorationTarget } from '../types';
 import { SihMethodologyModal } from './SihMethodologyModal';
+import { InfoTooltip } from './InfoTooltip';
 
 interface ProspectivityExplorerViewProps {
   targets: ExplorationTarget[];
@@ -259,11 +260,31 @@ export const ProspectivityExplorerView: React.FC<ProspectivityExplorerViewProps>
                 <th className="py-3 px-4">Rank & ID</th>
                 <th className="py-3 px-4">Location</th>
                 <th className="py-3 px-4">Formation Lithology</th>
-                <th className="py-3 px-4">SWIR B12/B11</th>
+                <th className="py-3 px-4 whitespace-nowrap">
+                  <span className="inline-flex items-center">
+                    SWIR B12/B11
+                    <InfoTooltip termKey="swir" position="bottom" />
+                  </span>
+                </th>
                 <th className="py-3 px-4">Depth (m)</th>
-                <th className="py-3 px-4">Confidence Band</th>
-                <th className="py-3 px-4">Grade (Mn %)</th>
-                <th className="py-3 px-4">Score</th>
+                <th className="py-3 px-4 whitespace-nowrap">
+                  <span className="inline-flex items-center">
+                    Confidence
+                    <InfoTooltip termKey="confidence" position="bottom" />
+                  </span>
+                </th>
+                <th className="py-3 px-4 whitespace-nowrap">
+                  <span className="inline-flex items-center">
+                    Grade (Mn %)
+                    <InfoTooltip termKey="grade" position="bottom" />
+                  </span>
+                </th>
+                <th className="py-3 px-4 whitespace-nowrap">
+                  <span className="inline-flex items-center">
+                    Score
+                    <InfoTooltip text="Prospectivity score (0–100) computed from satellite spectral bands and geophysical ground anomalies." position="bottom" />
+                  </span>
+                </th>
                 <th className="py-3 px-4 text-right">Action</th>
               </tr>
             </thead>
